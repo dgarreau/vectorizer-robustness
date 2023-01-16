@@ -32,7 +32,7 @@ examples = [0,1,3,7,10]
 # parameters of the experiment
 data    = "IMDB"
 implem  = "gensim"
-model   = "PVDMconcat"
+model   = "PVDMmean"
 
 # get unique identifier and create relevant folders
 vectorizer_name = get_vectorizer_name(data,implem,model)
@@ -77,7 +77,7 @@ for ex in examples:
     
 # setting up the figure title and file name
 s_title = model + ", $" + str(res_dict['n_rep']) + "$ replacements"
-fig_name = vectorizer_name + ".pdf"
+fig_name = join(figs_dir,vectorizer_name + ".pdf")
 ax.set_title(s_title,fontsize=large_fs)
 
 ax.set_xlabel("length of the document",fontsize=small_fs)
