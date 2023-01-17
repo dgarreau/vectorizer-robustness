@@ -4,6 +4,9 @@
 
 Training the models.
 
+WARNING: hs=0 and negative=0 does not what you think it does and results in 
+garbarge results, see https://groups.google.com/g/gensim/c/TCIrgMagoFc
+
 """
 
 import random

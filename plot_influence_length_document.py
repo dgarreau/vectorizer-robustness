@@ -43,7 +43,6 @@ if save_fig:
 
 # main figure
 fig,ax = plt.subplots(1,1,figsize=(10,10))
-
 for ex in examples:
     
     # load the results
@@ -56,8 +55,10 @@ for ex in examples:
 
     # computing a few things before plotting
     dist_store = np.zeros((n_length,n_simu))
+    norm_q_0_store = np.zeros((n_length,))
     for i in range(n_length):    
         q_orig = res_dict['q_orig_store'][i,:]
+        norm_q_0_store[i] = np.linalg.norm(q_orig)
         for i_simu in range(n_simu):
             q_new = res_dict['q_new_store'][i,i_simu]
             dist_store[i,i_simu] = np.linalg.norm(q_new-q_orig)
@@ -74,6 +75,8 @@ for ex in examples:
 
     # larger tick size
     ax.tick_params(labelsize=small_fs)
+    
+    #plt.plot(norm_q_0_store)
     
 # setting up the figure title and file name
 s_title = model + ", $" + str(res_dict['n_rep']) + "$ replacements"
