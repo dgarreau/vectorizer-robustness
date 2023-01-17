@@ -25,7 +25,7 @@ np.random.seed(seed)
 # parameters of the experiment
 data   = "IMDB"
 implem = "gensim"
-model  = "PVDMconcat"
+model  = "PVDBOW"
 
 # unique identifier
 vectorizer_name = get_vectorizer_name(data,implem,model)
