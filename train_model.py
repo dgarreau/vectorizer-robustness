@@ -13,6 +13,7 @@ import random
 import numpy as np
 import gensim
 import time
+import pickle
 
 from os.path import join
 
@@ -94,6 +95,10 @@ elif implem == 'scikit':
         # default = l2 normalization
         vectorizer = TfidfVectorizer()
         vectorizer.fit(dataset)
+    
+        f_name = join(MODELS_DIR,vectorizer_name)
+        with open(f_name, 'wb') as f:
+            pickle.dump(vectorizer,f)
     
     else: 
         print('not implemented')
