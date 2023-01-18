@@ -56,7 +56,7 @@ if implem == 'gensim':
 elif implem == 'scikit':
     # NOTE: winsize is arbitrary here
     winsize = 5
-    vocab = vectorizer.get_feature_names()
+    vocab = vectorizer.get_feature_names_out()
     D = len(vocab)
     dim = D
     
