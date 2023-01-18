@@ -72,6 +72,7 @@ for ex in examples:
     t_max = len(res_dict['example_orig'])
     t_grid = np.arange(2*res_dict['winsize']+1,t_max+1)
     ax.plot(t_grid,max_dist)
+    #ax.loglog(t_grid,max_dist)
 
     # larger tick size
     ax.tick_params(labelsize=small_fs)
