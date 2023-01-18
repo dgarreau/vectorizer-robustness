@@ -10,6 +10,9 @@ Credits to https://github.com/inejc/paragraph-vectors for the datainterface.
 
 import re
 import random
+import urllib.request
+import tarfile
+import shutil
 import numpy as np
 import gensim
 import sys
@@ -17,8 +20,7 @@ import smart_open
 import pandas as pd
 
 from os.path import join
-from os import makedirs
-from os import path
+from os import makedirs, path, remove
 import configparser
 
 from errno import EEXIST
@@ -67,6 +69,8 @@ def load_dataset(data,implem,verbose=False,split_ratio=0.1):
         
         n_docs = 50000
         file_path = join(DATA_DIR,'IMDB-Dataset.csv')
+        if not path.exists(file_path):
+            download_IMDB_dataset()
         
         if implem == 'local':
 
@@ -150,5 +154,40 @@ def _tokenize_str(str_):
     return str_.strip().lower().split()
 
 
+def download_IMDB_dataset():
+    # Download IMDB dataset into data folder
+    url = 'https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz'
+    filename = 'aclImdb_v1.tar.gz'
+    filepath = path.join(DATA_DIR, filename)
+    if not path.exists(filepath):
+        mkdir(DATA_DIR)
+        print('Downloading IMDB dataset...')
+        urllib.request.urlretrieve(url, filepath)
+        print('Done!')
+    else:
+        print('IMDB dataset already downloaded')
 
+    # Extract the dataset
+    if not path.exists(path.join(DATA_DIR, 'aclImdb')):
+        print('Extracting IMDB dataset...')
+        with tarfile.open(filepath, 'r') as ref:
+            ref.extractall(DATA_DIR)
+        print('Done!')
 
+    # Move the dataset to the data folder
+    if not path.exists(path.join(DATA_DIR, 'IMDB-Dataset.csv')):
+        print('Moving IMDB dataset...')
+        shutil.move(path.join(DATA_DIR, 'aclImdb', 'train', 'GOODFILE??'), path.join(DATA_DIR, 'IMDB-Dataset.csv'))
+        print('Done!')
+
+    # Remove the extracted dataset
+    if path.exists(path.join(DATA_DIR, 'aclImdb')):
+        print('Removing extracted IMDB dataset...')
+        shutil.rmtree(path.join(DATA_DIR, 'aclImdb'))
+        print('Done!')
+
+    # Remove the zip file
+    if path.exists(filepath):
+        print('Removing zip file...')
+        remove(filepath)
+        print('Done!')
