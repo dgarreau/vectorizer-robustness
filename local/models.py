@@ -175,23 +175,19 @@ class PVDBOW(nn.Module):
     def get_dim(self):
         return self.dim
     
-    def save(self,model_file_name=None,vocab_file_name=None,param_file_name=None,verbose=False):
+    def save(self,name,verbose=False):
         """
         Saving the model.
     
         BEWARE: simply saving the weights, distinct from the save_training_state util.
         """
-    
-        if model_file_name == None:
-            model_file_name = _DBOW_WEIGHTS_NAME.format(self.n_docs,self.n_words,self.dim,self.context_size)
-        if vocab_file_name == None:
-            vocab_file_name = _DBOW_VOCAB_NAME.format(self.n_docs,self.n_words,self.dim,self.context_size)
-        if param_file_name == None:
-            param_file_name = _DBOW_PARAM_NAME.format(self.n_docs,self.n_words,self.dim,self.context_size)
+     
+        vocab_name = "vocab_" + name
+        param_name = "params_" + name
         
-        model_file_path = join(MODELS_DIR, model_file_name)
-        vocab_file_path = join(MODELS_DIR, vocab_file_name)
-        param_file_path = join(MODELS_DIR, param_file_name)
+        model_file_path = join(MODELS_DIR, name)
+        vocab_file_path = join(MODELS_DIR, vocab_name)
+        param_file_path = join(MODELS_DIR, param_name)
         
         if verbose:
             print('saving weights at {}'.format(model_file_path))
@@ -202,26 +198,25 @@ class PVDBOW(nn.Module):
         # saving some additional parameters
         param_dict = {}
         param_dict['nu'] = self.context_size
-        #param_dict['lr'] = self.lr
+#        param_dict['lr'] = self.lr
             
         torch.save(self.state_dict(), model_file_path)
         torch.save(self.vocabulary, vocab_file_path)
         torch.save(param_dict, param_file_path)
 
-    def load(self,model_name,verbose=False):
+    def load(self,name,verbose=False):
         """
         Loading a model from the MODELS_DIR folder.
         
         BEWARE: sizes have to match.
         """
+
+        vocab_name = "vocab_" + name
+        param_name = "params_" + name
         
-        model_file_name = 'DBOW_weights_' + model_name + '.pth.tar'
-        vocab_file_name = 'DBOW_vocab_' + model_name + '.pth.tar'
-        param_file_name = 'DBOW_param_' + model_name + '.pth.tar'
-        
-        model_file_path = join(MODELS_DIR,model_file_name)
-        vocab_file_path = join(MODELS_DIR,vocab_file_name)
-        param_file_path = join(MODELS_DIR,param_file_name)
+        model_file_path = join(MODELS_DIR, name)
+        vocab_file_path = join(MODELS_DIR, vocab_name)
+        param_file_path = join(MODELS_DIR, param_name)
         
         if verbose:
             print('loading model from {}'.format(model_file_path))
@@ -458,20 +453,19 @@ class PVDM(nn.Module):
     def is_concat(self):
         return self.concat
 
-    def load(self,model_name,verbose=False):
+    def load(self,name,verbose=False):
         """
         Loading a model from the MODELS_DIR folder.
         
         BEWARE: sizes have to match.
         """
         
-        model_file_name = 'DM_weights_' + model_name + '.pth.tar'
-        vocab_file_name = 'DM_vocab_' + model_name + '.pth.tar'
-        param_file_name = 'DM_param_' + model_name + '.pth.tar'
+        vocab_name = "vocab_" + name
+        param_name = "params_" + name
         
-        model_file_path = join(MODELS_DIR,model_file_name)
-        vocab_file_path = join(MODELS_DIR,vocab_file_name)
-        param_file_path = join(MODELS_DIR,param_file_name)
+        model_file_path = join(MODELS_DIR, name)
+        vocab_file_path = join(MODELS_DIR, vocab_name)
+        param_file_path = join(MODELS_DIR, param_name)
         
         if verbose:
             print('loading model from {}'.format(model_file_path))
@@ -506,28 +500,19 @@ class PVDM(nn.Module):
             print('concat = {}'.format(self.concat))
             print()
         
-    def save(self,model_file_name=None,vocab_file_name=None,param_file_name=None,verbose=False):
+    def save(self,name,verbose=False):
         """
         Saving the model.
     
         BEWARE: simply saving the weights, distinct from the save_training_state util.
         """
         
-        if self.concat:
-            int_concat = 1
-        else:
-            int_concat = 0
-    
-        if model_file_name == None:
-            model_file_name = _DM_WEIGHTS_NAME.format(self.n_docs,self.n_words,self.dim,self.context_size,int_concat)
-        if vocab_file_name == None:
-            vocab_file_name = _DM_VOCAB_NAME.format(self.n_docs,self.n_words,self.dim,self.context_size,int_concat)
-        if param_file_name == None:
-            param_file_name = _DM_PARAM_NAME.format(self.n_docs,self.n_words,self.dim,self.context_size,int_concat)
+        vocab_name = "vocab_" + name
+        param_name = "params_" + name
         
-        model_file_path = join(MODELS_DIR, model_file_name)
-        vocab_file_path = join(MODELS_DIR, vocab_file_name)
-        param_file_path = join(MODELS_DIR, param_file_name)
+        model_file_path = join(MODELS_DIR, name)
+        vocab_file_path = join(MODELS_DIR, vocab_name)
+        param_file_path = join(MODELS_DIR, param_name)
         
         if verbose:
             print('saving weights at {}'.format(model_file_path))

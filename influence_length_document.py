@@ -12,6 +12,8 @@ import time
 import pickle
 import numpy as np
 
+from local.models import PVDM,PVDBOW
+
 from gensim.models.doc2vec import Doc2Vec
 
 from os.path import join
@@ -28,8 +30,8 @@ np.random.seed(seed)
 
 # parameters of the experiment
 data    = "IMDB"
-implem  = "scikit"
-model   = "TFIDF"
+implem  = "local"
+model   = "PVDMmean"
 
 # get unique identifier and create relevant folder
 vectorizer_name = get_vectorizer_name(data,implem,model)
@@ -43,6 +45,14 @@ if implem == 'gensim':
 elif implem == 'scikit':
     with open(f_name,'rb') as f:
         vectorizer = pickle.load(f)
+elif implem == 'local':
+    if model == 'PVDMmean':
+        vectorizer = PVDM(concat=False)
+    elif model == 'PVDMconcat':
+        vectorizer = PVDM(concat=True)
+    elif model == 'PVDBOW':
+        PVDBOW()
+    vectorizer.load(vectorizer_name)
 
 # load dataset
 dataset = load_dataset(data,implem,verbose=True)
@@ -59,6 +69,11 @@ elif implem == 'scikit':
     vocab = vectorizer.get_feature_names_out()
     D = len(vocab)
     dim = D
+elif implem == 'local':
+    winsize = vectorizer.get_context_size()
+    dim = vectorizer.get_dim()
+    D = vectorizer.get_n_words()
+    vocab = vectorizer.vocabulary
     
 # main loop
 n_rep = 5
@@ -93,6 +108,8 @@ for ex in examples:
             q_orig_store[current_length-2*winsize-1] = vectorizer.infer_vector(ex_current_list)
         elif implem == 'scikit':
             q_orig_store[current_length-2*winsize-1] = vectorizer.transform([ex_current]).todense()
+#        elif implem == 'local':
+#            q_orig_store[current_length-2*winsize-1] = 
             
         # Monte-Carlo loop starts
         for i_simu in range(n_simu):

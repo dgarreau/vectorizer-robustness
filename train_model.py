@@ -24,6 +24,9 @@ from utils import get_vectorizer_name
 from utils import load_dataset
 from utils import MODELS_DIR, mkdir
 
+# create folder to save data
+mkdir(MODELS_DIR)
+
 # fix the seed
 seed = 0
 random.seed(seed)
@@ -111,7 +114,7 @@ elif implem == 'local':
     
     dim = 50
     winsize = 5
-    n_epochs = 10
+    n_epochs = 1
     
     if model == 'PVDMmean':
         lr = 0.001 
@@ -127,7 +130,7 @@ elif implem == 'local':
     vectorizer.train(dataset,lr=lr,n_epochs=n_epochs,verbose=True)
     
     # saving the model
-    vectorizer.save()
+    vectorizer.save(vectorizer_name,verbose=True)
 
 else:
     
