@@ -27,7 +27,7 @@ from math import ceil
 
 from torchtext.legacy.data import Field, TabularDataset
 
-from model.utils import DATA_DIR
+from utils import DATA_DIR
 
 # setting the seed for the datasplit
 random.seed(0)
