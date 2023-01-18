@@ -80,7 +80,7 @@ s_title = model
 fig_name = join(figs_dir,vectorizer_name + ".pdf")
 ax.set_title(s_title,fontsize=large_fs)
 
-ax.set_xlabel("length of the document",fontsize=small_fs)
+ax.set_xlabel("number of replacements",fontsize=small_fs)
 ax.set_ylabel(r"Euclidean distance to $q_0$",fontsize=small_fs)
 
 if save_fig:
