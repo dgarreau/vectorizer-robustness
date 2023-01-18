@@ -124,7 +124,7 @@ elif implem == 'local':
         vectorizer = PVDM(dim=dim,context_size=winsize,concat=True)
     elif model == 'PVDBOW':
         lr = 0.001
-        PVDBOW(dim=dim,context_size=winsize)
+        vectorizer = PVDBOW(dim=dim,context_size=winsize)
 
     # training the model
     vectorizer.train(dataset,lr=lr,n_epochs=n_epochs,verbose=True)
