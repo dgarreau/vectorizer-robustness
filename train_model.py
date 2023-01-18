@@ -16,6 +16,7 @@ import time
 
 from os.path import join
 
+from sklearn.feature_extraction.text import TfidfVectorizer
 from utils import get_vectorizer_name
 from utils import load_dataset
 from utils import MODELS_DIR
@@ -27,8 +28,8 @@ np.random.seed(seed)
 
 # parameters of the experiment
 data   = "IMDB"
-implem = "gensim"
-model  = "PVDBOW"
+implem = "scikit"# scikit, gensim, local
+model  = "TFIDF"# TFIDF, PVDMmean, PVDMconcat, PVDBOW
 
 # unique identifier
 vectorizer_name = get_vectorizer_name(data,implem,model)
@@ -86,6 +87,19 @@ if implem == 'gensim':
     f_name = join(MODELS_DIR,vectorizer_name)
     vectorizer.save(f_name)
 
+elif implem == 'scikit':
+    
+    if model == 'TFIDF':
+        
+        # default = l2 normalization
+        vectorizer = TfidfVectorizer()
+        vectorizer.fit(dataset)
+    
+    else: 
+        print('not implemented')
 
+else:
+    
+    print('not implemented')
 
 

@@ -14,6 +14,7 @@ import numpy as np
 import gensim
 import sys
 import smart_open
+import pandas as pd
 
 from os.path import join
 from os import makedirs
@@ -85,6 +86,11 @@ def load_dataset(data,implem,verbose=False,split_ratio=0.1):
 
             dataset = list(read_corpus(file_path,int(split_ratio*n_docs)))
         
+        elif implem == "scikit":
+            
+            df = pd.read_csv(file_path)
+            dataset = list(df['review'][:int(split_ratio*n_docs)])
+            
         else:
             print('not implemented')
         
