@@ -24,6 +24,7 @@ from os.path import join
 
 from .data import NCEData
 from .loss import LogSoftmax
+from .inference import compute_embedding
 
 _DM_WEIGHTS_NAME = ("DM_weights_N.{:d}_D.{:d}_d.{:d}_nu.{:d}_concat.{:d}.pth.tar")
 _DM_VOCAB_NAME   = ("DM_vocab_N.{:d}_D.{:d}_d.{:d}_nu.{:d}_concat.{:d}.pth.tar")
@@ -246,6 +247,23 @@ class PVDBOW(nn.Module):
             print('d = {}'.format(self.dim))
             print('context_size = {}'.format(self.context_size))
             print()
+            
+    def infer(self,document,n_steps=None,gamma=None,track_objective=False):
+        """
+        Get embedding. 
+        """
+        tokenized_doc = np.array([self.vocabulary.stoi[w] for w in document],dtype=int)
+        R_array = self.get_R_matrix()
+        q_vec,traj_store,obj_store = compute_embedding(tokenized_doc,
+                                   R_array,
+                                   model="PVDBOW",
+                                   P_matrix=None,
+                                   mode="true",
+                                   track_objective=track_objective,
+                                   winsize=self.context_size,
+                                   n_steps=n_steps,
+                                   gamma=gamma)
+        return q_vec
 
 class PVDM(nn.Module):
     """
@@ -529,3 +547,25 @@ class PVDM(nn.Module):
         torch.save(self.state_dict(), model_file_path)
         torch.save(self.vocabulary, vocab_file_path)
         torch.save(param_dict, param_file_path)
+        
+    def infer(self,document,n_steps=None,gamma=None,track_objective=False):
+        """
+        Get embedding. 
+        """
+        if self.concat:
+            model = "PVDMconcat"
+        else:
+            model = "PVDMmean"
+        P_array = self.get_P_matrix()
+        R_array = self.get_R_matrix()
+        tokenized_doc = np.array([self.vocabulary.stoi[w] for w in document],dtype=int)
+        q_vec,traj_store,obj_store = compute_embedding(tokenized_doc,
+                                   R_array,
+                                   model=model,
+                                   P_matrix=P_array,
+                                   mode="true",
+                                   track_objective=track_objective,
+                                   winsize=self.context_size,
+                                   n_steps=n_steps,
+                                   gamma=gamma)
+        return q_vec

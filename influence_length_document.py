@@ -73,12 +73,12 @@ elif implem == 'local':
     winsize = vectorizer.get_context_size()
     dim = vectorizer.get_dim()
     D = vectorizer.get_n_words()
-    vocab = vectorizer.vocabulary
+    vocab = vectorizer.vocabulary.itos
     
 # main loop
 n_rep = 5
-n_simu = 50
-examples = [0,1,3,7,10]
+n_simu = 2
+examples = [0]#[0,1,3,7,10]
 for ex in examples:
     print('looking at example {}'.format(ex))
     
@@ -88,6 +88,9 @@ for ex in examples:
     elif implem == 'scikit':
         ex_orig = dataset[ex]
         ex_orig_list = ex_orig.split(' ')
+    elif implem == 'local':
+        ex_orig = dataset[ex]
+        ex_orig_list = ex_orig.text.copy()
     
     # range of the experiment
     t_max = len(ex_orig_list)
@@ -108,8 +111,8 @@ for ex in examples:
             q_orig_store[current_length-2*winsize-1] = vectorizer.infer_vector(ex_current_list)
         elif implem == 'scikit':
             q_orig_store[current_length-2*winsize-1] = vectorizer.transform([ex_current]).todense()
-#        elif implem == 'local':
-#            q_orig_store[current_length-2*winsize-1] = 
+        elif implem == 'local':
+            q_orig_store[current_length-2*winsize-1] = vectorizer.infer(ex_current_list,n_steps=2)
             
         # Monte-Carlo loop starts
         for i_simu in range(n_simu):
@@ -127,6 +130,8 @@ for ex in examples:
                 q_new_store[current_length-2*winsize-1,i_simu,:] = vectorizer.infer_vector(ex_new_list)
             elif implem == 'scikit':
                 q_new_store[current_length-2*winsize-1,i_simu,:] = vectorizer.transform([ex_new]).todense()
+            elif implem == 'local':
+                q_new_store[current_length-2*winsize-1,i_simu,:] = vectorizer.infer(ex_new_list,n_steps=2)
                 
     t_end = time.time()
     print("elapsed: {}".format(t_end-t_start))
