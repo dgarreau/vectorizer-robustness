@@ -28,8 +28,8 @@ np.random.seed(seed)
 
 # parameters of the experiment
 data    = "IMDB"
-implem  = "gensim"
-model   = "PVDBOW"
+implem  = "scikit"
+model   = "TFIDF"
 
 # get unique identifier and create relevant folder
 vectorizer_name = get_vectorizer_name(data,implem,model)
@@ -40,15 +40,25 @@ mkdir(res_dir)
 f_name = join(MODELS_DIR,vectorizer_name)
 if implem == 'gensim':
     vectorizer = Doc2Vec.load(f_name)
+elif implem == 'scikit':
+    with open(f_name,'rb') as f:
+        vectorizer = pickle.load(f)
 
 # load dataset
 dataset = load_dataset(data,implem,verbose=True)
 
 # get relevant parameters
-winsize = vectorizer.window
-dim     = vectorizer.vector_size
-D       = len(vectorizer.wv)
-vocab   = vectorizer.wv.index_to_key
+if implem == 'gensim':
+    winsize = vectorizer.window
+    dim     = vectorizer.vector_size
+    D       = len(vectorizer.wv)
+    vocab   = vectorizer.wv.index_to_key
+elif implem == 'scikit':
+    # NOTE: winsize is arbitrary here
+    winsize = 5
+    vocab = vectorizer.get_feature_names()
+    D = len(vocab)
+    dim = D
     
 # main loop
 n_rep = 5
@@ -58,7 +68,11 @@ for ex in examples:
     print('looking at example {}'.format(ex))
     
     # copy the current example
-    ex_orig_list = dataset[ex][0].copy()
+    if implem == 'gensim':
+        ex_orig_list = dataset[ex][0].copy()
+    elif implem == 'scikit':
+        ex_orig = dataset[0]
+        ex_orig_list = ex_orig.split(' ')
     
     # range of the experiment
     t_max = len(ex_orig_list)
@@ -73,8 +87,13 @@ for ex in examples:
     for current_length in range(2*winsize+1,t_max+1):
         print("{} / {}".format(current_length-2*winsize,n_length))
         ex_current_list = ex_orig_list[:current_length].copy()
-        q_orig_store[current_length-2*winsize-1] = vectorizer.infer_vector(ex_current_list)
+        ex_current = ' '.join(ex_current_list)
         
+        if implem == 'gensim':
+            q_orig_store[current_length-2*winsize-1] = vectorizer.infer_vector(ex_current_list)
+        elif implem == 'scikit':
+            q_orig_store[current_length-2*winsize-1] = vectorizer.transform([ex_current]).todense()
+            
         # Monte-Carlo loop starts
         for i_simu in range(n_simu):
             pert_ind = list(random.sample(range(current_length),n_rep))
@@ -84,10 +103,14 @@ for ex in examples:
             # replace words at random
             for i_rep in range(n_rep):
                 ex_new_list[pert_ind[i_rep]] = vocab[new_words[i_rep]]
+            ex_new = ' '.join(ex_new_list)
             
             # get vectorization of the new document
-            q_new_store[current_length-2*winsize-1,i_simu,:] = vectorizer.infer_vector(ex_new_list)
-            
+            if implem == 'gensim':
+                q_new_store[current_length-2*winsize-1,i_simu,:] = vectorizer.infer_vector(ex_new_list)
+            elif implem == 'scikit':
+                q_new_store[current_length-2*winsize-1,i_simu,:] = vectorizer.transform([ex_new]).todense()
+                
     t_end = time.time()
     print("elapsed: {}".format(t_end-t_start))
     
