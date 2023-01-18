@@ -156,8 +156,8 @@ def _tokenize_str(str_):
 
 def download_IMDB_dataset():
     # Download IMDB dataset into data folder
-    url = 'https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz'
-    filename = 'aclImdb_v1.tar.gz'
+    url = 'https://github.com/Ankit152/IMDB-sentiment-analysis/blob/master/IMDB-Dataset.csv?raw=true'
+    filename = 'IMDB-Dataset.csv'
     filepath = path.join(DATA_DIR, filename)
     if not path.exists(filepath):
         mkdir(DATA_DIR)
@@ -167,27 +167,27 @@ def download_IMDB_dataset():
     else:
         print('IMDB dataset already downloaded')
 
-    # Extract the dataset
-    if not path.exists(path.join(DATA_DIR, 'aclImdb')):
-        print('Extracting IMDB dataset...')
-        with tarfile.open(filepath, 'r') as ref:
-            ref.extractall(DATA_DIR)
-        print('Done!')
+    # # Extract the dataset
+    # if not path.exists(path.join(DATA_DIR, 'aclImdb')):
+    #     print('Extracting IMDB dataset...')
+    #     with tarfile.open(filepath, 'r') as ref:
+    #         ref.extractall(DATA_DIR)
+    #     print('Done!')
 
-    # Move the dataset to the data folder
-    if not path.exists(path.join(DATA_DIR, 'IMDB-Dataset.csv')):
-        print('Moving IMDB dataset...')
-        shutil.move(path.join(DATA_DIR, 'aclImdb', 'train', 'GOODFILE??'), path.join(DATA_DIR, 'IMDB-Dataset.csv'))
-        print('Done!')
+    # # Move the dataset to the data folder
+    # if not path.exists(path.join(DATA_DIR, 'IMDB-Dataset.csv')):
+    #     print('Moving IMDB dataset...')
+    #     shutil.move(path.join(DATA_DIR, 'aclImdb', 'train', 'GOODFILE??'), path.join(DATA_DIR, 'IMDB-Dataset.csv'))
+    #     print('Done!')
 
-    # Remove the extracted dataset
-    if path.exists(path.join(DATA_DIR, 'aclImdb')):
-        print('Removing extracted IMDB dataset...')
-        shutil.rmtree(path.join(DATA_DIR, 'aclImdb'))
-        print('Done!')
+    # # Remove the extracted dataset
+    # if path.exists(path.join(DATA_DIR, 'aclImdb')):
+    #     print('Removing extracted IMDB dataset...')
+    #     shutil.rmtree(path.join(DATA_DIR, 'aclImdb'))
+    #     print('Done!')
 
-    # Remove the zip file
-    if path.exists(filepath):
-        print('Removing zip file...')
-        remove(filepath)
-        print('Done!')
+    # # Remove the zip file
+    # if path.exists(filepath):
+    #     print('Removing zip file...')
+    #     remove(filepath)
+    #     print('Done!')
