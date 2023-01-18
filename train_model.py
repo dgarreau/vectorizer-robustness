@@ -22,7 +22,7 @@ from local.models import PVDM,PVDBOW
 from sklearn.feature_extraction.text import TfidfVectorizer
 from utils import get_vectorizer_name
 from utils import load_dataset
-from utils import MODELS_DIR
+from utils import MODELS_DIR, mkdir
 
 # fix the seed
 seed = 0
@@ -88,6 +88,7 @@ if implem == 'gensim':
 
     # save the model to disk
     f_name = join(MODELS_DIR,vectorizer_name)
+    mkdir(MODELS_DIR)
     vectorizer.save(f_name)
 
 elif implem == 'scikit':
@@ -97,7 +98,8 @@ elif implem == 'scikit':
         # default = l2 normalization
         vectorizer = TfidfVectorizer()
         vectorizer.fit(dataset)
-    
+
+        mkdir(MODELS_DIR)
         f_name = join(MODELS_DIR,vectorizer_name)
         with open(f_name, 'wb') as f:
             pickle.dump(vectorizer,f)
