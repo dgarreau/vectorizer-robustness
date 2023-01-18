@@ -19,6 +19,7 @@ import pandas as pd
 from os.path import join
 from os import makedirs
 from os import path
+import configparser
 
 from errno import EEXIST
 
@@ -30,7 +31,9 @@ random.seed(seed)
 np.random.seed(seed)
 
 # change here for local use
-_root_dir = "/home/dgarreau/Documents/research_local/current_projects/vectorizer/"
+config = configparser.ConfigParser()
+config.read('config.ini')
+_root_dir = path.expanduser(config.get('files', 'root_path'))
 
 DATA_DIR    = join(_root_dir, 'data')
 FIGS_DIR    = join(_root_dir, 'figures')
