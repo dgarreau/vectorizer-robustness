@@ -71,7 +71,7 @@ for ex in examples:
     if implem == 'gensim':
         ex_orig_list = dataset[ex][0].copy()
     elif implem == 'scikit':
-        ex_orig = dataset[0]
+        ex_orig = dataset[ex]
         ex_orig_list = ex_orig.split(' ')
     
     # range of the experiment
