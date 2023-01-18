@@ -17,6 +17,8 @@ import pickle
 
 from os.path import join
 
+from local.models import PVDM,PVDBOW
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from utils import get_vectorizer_name
 from utils import load_dataset
@@ -29,8 +31,8 @@ np.random.seed(seed)
 
 # parameters of the experiment
 data   = "IMDB"
-implem = "scikit"# scikit, gensim, local
-model  = "TFIDF"# TFIDF, PVDMmean, PVDMconcat, PVDBOW
+implem = "local"# scikit, gensim, local
+model  = "PVDMmean"# TFIDF, PVDMmean, PVDMconcat, PVDBOW
 
 # unique identifier
 vectorizer_name = get_vectorizer_name(data,implem,model)
@@ -102,6 +104,28 @@ elif implem == 'scikit':
     
     else: 
         print('not implemented')
+
+elif implem == 'local':
+    
+    dim = 50
+    winsize = 5
+    n_epochs = 10
+    
+    if model == 'PVDMmean':
+        lr = 0.001 
+        vectorizer = PVDM(dim=dim,context_size=winsize,concat=False)
+    elif model == 'PVDMconcat':
+        lr = 0.0005
+        vectorizer = PVDM(dim=dim,context_size=winsize,concat=True)
+    elif model == 'PVDBOW':
+        lr = 0.001
+        PVDBOW(dim=dim,context_size=winsize)
+
+    # training the model
+    vectorizer.train(dataset,lr=lr,n_epochs=n_epochs,verbose=True)
+    
+    # saving the model
+    vectorizer.save()
 
 else:
     

@@ -66,7 +66,9 @@ def load_dataset(data,implem,verbose=False,split_ratio=0.1):
         file_path = join(DATA_DIR,'IMDB-Dataset.csv')
         
         if implem == 'local':
-
+            
+            # taking only 1000 doc
+            split_ratio = 0.02
             text_field = Field(pad_token=None, tokenize=_tokenize_str)
             class_field = Field()
             initial = TabularDataset(
