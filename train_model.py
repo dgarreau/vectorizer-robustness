@@ -34,7 +34,7 @@ np.random.seed(seed)
 
 # parameters of the experiment
 data   = "IMDB"
-implem = "local"# scikit, gensim, local
+implem = "gensim"# scikit, gensim, local
 model  = "PVDMmean"# TFIDF, PVDMmean, PVDMconcat, PVDBOW
 
 # unique identifier
