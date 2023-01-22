@@ -31,8 +31,8 @@ examples = [3,7,10]
 
 # parameters of the experiment
 data    = "IMDB"
-implem  = "scikit"
-model   = "TFIDF"
+implem  = "gensim"
+model   = "PVDBOW"
 
 # get unique identifier and create relevant folders
 vectorizer_name = get_vectorizer_name(data,implem,model)

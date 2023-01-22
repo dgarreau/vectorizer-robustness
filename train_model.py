@@ -4,8 +4,9 @@
 
 Training the models.
 
-WARNING: hs=0 and negative=0 does not what you think it does and results in 
-garbarge results, see https://groups.google.com/g/gensim/c/TCIrgMagoFc
+WARNING: with the gensim implementation, taking hs=0 and negative=0 does not do
+what you think it does and may result in strange results, see 
+https://groups.google.com/g/gensim/c/TCIrgMagoFc
 
 """
 
@@ -34,8 +35,8 @@ np.random.seed(seed)
 
 # parameters of the experiment
 data   = "IMDB"
-implem = "scikit"# scikit, gensim, local
-model  = "TFIDF"# TFIDF, PVDMmean, PVDMconcat, PVDBOW
+implem = "gensim"# scikit, gensim, local
+model  = "PVDBOW"# TFIDF, PVDMmean, PVDMconcat, PVDBOW
 
 # unique identifier
 vectorizer_name = get_vectorizer_name(data,implem,model)
@@ -114,7 +115,7 @@ elif implem == 'local':
     
     dim = 50
     winsize = 5
-    n_epochs = 1
+    n_epochs = 100
     
     if model == 'PVDMmean':
         lr = 0.001 

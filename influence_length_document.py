@@ -30,8 +30,8 @@ np.random.seed(seed)
 
 # parameters of the experiment
 data    = "IMDB"
-implem  = "scikit"
-model   = "TFIDF"
+implem  = "gensim"
+model   = "PVDBOW"
 
 # get unique identifier and create relevant folder
 vectorizer_name = get_vectorizer_name(data,implem,model)
@@ -77,7 +77,7 @@ elif implem == 'local':
     
 # main loop
 n_rep = 5
-n_simu = 2
+n_simu = 50
 examples = [0,1,3,7,10]
 for ex in examples:
     print('looking at example {}'.format(ex))
