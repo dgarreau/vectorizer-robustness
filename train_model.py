@@ -34,8 +34,8 @@ np.random.seed(seed)
 
 # parameters of the experiment
 data   = "IMDB"
-implem = "gensim"# scikit, gensim, local
-model  = "PVDMmean"# TFIDF, PVDMmean, PVDMconcat, PVDBOW
+implem = "scikit"# scikit, gensim, local
+model  = "TFIDF"# TFIDF, PVDMmean, PVDMconcat, PVDBOW
 
 # unique identifier
 vectorizer_name = get_vectorizer_name(data,implem,model)

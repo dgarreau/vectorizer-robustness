@@ -30,8 +30,8 @@ np.random.seed(seed)
 
 # parameters of the experiment
 data    = "IMDB"
-implem  = "local"
-model   = "PVDMmean"
+implem  = "scikit"
+model   = "TFIDF"
 
 # get unique identifier and create relevant folder
 vectorizer_name = get_vectorizer_name(data,implem,model)
@@ -66,7 +66,7 @@ if implem == 'gensim':
 elif implem == 'scikit':
     # NOTE: winsize is arbitrary here
     winsize = 5
-    vocab = vectorizer.get_feature_names_out()
+    vocab = vectorizer.get_feature_names()
     D = len(vocab)
     dim = D
 elif implem == 'local':
@@ -78,7 +78,7 @@ elif implem == 'local':
 # main loop
 n_rep = 5
 n_simu = 2
-examples = [0]
+examples = [0,1,3,7,10]
 for ex in examples:
     print('looking at example {}'.format(ex))
     

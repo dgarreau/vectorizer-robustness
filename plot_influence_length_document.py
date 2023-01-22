@@ -22,17 +22,17 @@ save_fig = True
 
 # plot params
 alpha = 0.5
-small_fs = 15
-large_fs = 25
+small_fs = 25
+large_fs = 35
 lw = 3
 
 # examples to plot
-examples = [0]#[0,1,3,7,10]
+examples = [3,7,10]#[0,1,3,7,10]
 
 # parameters of the experiment
 data    = "IMDB"
-implem  = "local"
-model   = "PVDMmean"
+implem  = "scikit"
+model   = "TFIDF"
 
 # get unique identifier and create relevant folders
 vectorizer_name = get_vectorizer_name(data,implem,model)
@@ -42,7 +42,7 @@ if save_fig:
     mkdir(figs_dir)
 
 # main figure
-fig,ax = plt.subplots(1,1,figsize=(10,10))
+fig,ax = plt.subplots(1,1,figsize=(10,8))
 for ex in examples:
     
     # load the results
@@ -55,10 +55,8 @@ for ex in examples:
 
     # computing a few things before plotting
     dist_store = np.zeros((n_length,n_simu))
-    norm_q_0_store = np.zeros((n_length,))
     for i in range(n_length):    
         q_orig = res_dict['q_orig_store'][i,:]
-        norm_q_0_store[i] = np.linalg.norm(q_orig)
         for i_simu in range(n_simu):
             q_new = res_dict['q_new_store'][i,i_simu]
             dist_store[i,i_simu] = np.linalg.norm(q_new-q_orig)
@@ -71,18 +69,15 @@ for ex in examples:
     # plotting       
     t_max = len(res_dict['example_orig'])
     t_grid = np.arange(2*res_dict['winsize']+1,t_max+1)
-    ax.plot(t_grid,max_dist)
-    #ax.loglog(t_grid,max_dist)
+    ax.plot(t_grid,max_dist,linewidth=lw)
 
     # larger tick size
     ax.tick_params(labelsize=small_fs)
     
-    #plt.plot(norm_q_0_store)
-    
 # setting up the figure title and file name
-s_title = model + ", $" + str(res_dict['n_rep']) + "$ replacements"
+#s_title = model + ", $" + str(res_dict['n_rep']) + "$ replacements"
 fig_name = join(figs_dir,vectorizer_name + ".pdf")
-ax.set_title(s_title,fontsize=large_fs)
+#ax.set_title(s_title,fontsize=large_fs)
 
 ax.set_xlabel("length of the document",fontsize=small_fs)
 ax.set_ylabel(r"Euclidean distance to $q_0$",fontsize=small_fs)

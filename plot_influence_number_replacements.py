@@ -22,12 +22,12 @@ save_fig = True
 
 # plot params
 alpha = 0.5
-small_fs = 15
-large_fs = 25
+small_fs = 25
+large_fs = 35
 lw = 3
 
 # examples to plot
-examples = [0,1,3,7,10]
+examples = [3,7,10]
 
 # parameters of the experiment
 data    = "IMDB"
@@ -42,7 +42,7 @@ if save_fig:
     mkdir(figs_dir)
 
 # main figure
-fig,ax = plt.subplots(1,1,figsize=(10,10))
+fig,ax = plt.subplots(1,1,figsize=(10,8))
 
 for ex in examples:
     
@@ -70,15 +70,15 @@ for ex in examples:
 
     # plot
     t_grid = np.arange(1,T+1)
-    ax.plot(t_grid,max_dist)
+    ax.plot(t_grid,max_dist,linewidth=lw)
 
     # larger tick size
     ax.tick_params(labelsize=small_fs)
     
 # setting up the figure title and file name
-s_title = model
+#s_title = model
 fig_name = join(figs_dir,vectorizer_name + ".pdf")
-ax.set_title(s_title,fontsize=large_fs)
+#ax.set_title(s_title,fontsize=large_fs)
 
 ax.set_xlabel("number of replacements",fontsize=small_fs)
 ax.set_ylabel(r"Euclidean distance to $q_0$",fontsize=small_fs)
