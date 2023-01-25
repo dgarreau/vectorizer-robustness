@@ -1,116 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-
-Data interface, credits to https://github.com/inejc/paragraph-vectors
-
-IMDB dataset available at https://github.com/Ankit152/IMDB-sentiment-analysis/blob/master/IMDB-Dataset.csv
+Data interface, kudos to https://github.com/inejc/paragraph-vectors
 
 """
 
-import sys
-sys.path.insert(1,'/home/dgarreau/Documents/research_local/current_projects/vectorizer/vectorizer-dev/doc2vec')
-
-import re
 import multiprocessing
 import os
 import torch
 import signal
 import numpy as np
-import random
-
-from os.path import join
 
 from numpy.random import choice
 
 from math import ceil
-
-from torchtext.legacy.data import Field, TabularDataset
-
-from utils import DATA_DIR
-
-# setting the seed for the datasplit
-random.seed(0)
-
-def load_dataset(data='toy',verbose=False,split_ratio=0.1):
-
-    if verbose:
-        print('loading data...')
-    
-    if data == 'toy':
-    
-        #file_path = '../../../data/example.csv'
-        file_path = join(DATA_DIR,'example.csv')
-        text_field = Field(pad_token=None, tokenize=_tokenize_str)
-        class_field = Field(dtype=int)
-        dataset = TabularDataset(
-                path=file_path,
-                format='csv',
-                fields=[('text', text_field),('label',class_field)],
-                skip_header=True)
-        
-        
-        if verbose:
-            print('building vocabulary...')
-        text_field.build_vocab(dataset)
-        
-        if verbose:
-            print('done!')
-            
-    elif data == 'IMDB':
-        #file_path = '../../../data/IMDB-Dataset.csv'
-        file_path = join(DATA_DIR,'IMDB-Dataset.csv')
-        text_field = Field(pad_token=None, tokenize=_tokenize_str)
-        class_field = Field()
-        initial = TabularDataset(
-                path=file_path,
-                format='csv',
-                fields=[('text', text_field),('label',class_field)],
-                skip_header=True)
-        
-        dataset,_ = initial.split(split_ratio=split_ratio,random_state=random.getstate())
-        
-        if verbose:
-            print('building vocabulary...')
-        text_field.build_vocab(dataset)
-        if verbose:
-            print('done!')
-            
-    else:
-        dataset = []
-        print('not implemented yet')
-    
-    print('done!')
-    print()
-    return dataset
-    
-def _tokenize_str(str_):
-    
-    # keep only alphanumeric and punctuation signs
-    str_ = re.sub(r'[^A-Za-z0-9(),.!?\'`]', ' ', str_)
-    #str_ = re.sub(r'[^A-Za-z0-9]', ' ', str_)
-    
-    # remove multiple whitespace characters
-    str_ = re.sub(r'\s{2,}', ' ', str_)
-    
-    # punctations to tokens
-    str_ = re.sub(r'\(', ' ( ', str_)
-    str_ = re.sub(r'\)', ' ) ', str_)
-    str_ = re.sub(r',', ' , ', str_)
-    str_ = re.sub(r'\.', ' . ', str_)
-    str_ = re.sub(r'!', ' ! ', str_)
-    str_ = re.sub(r'\?', ' ? ', str_)
-    
-    # split contractions into multiple tokens
-    str_ = re.sub(r'\'s', ' \'s', str_)
-    str_ = re.sub(r'\'ve', ' \'ve', str_)
-    str_ = re.sub(r'n\'t', ' n\'t', str_)
-    str_ = re.sub(r'\'re', ' \'re', str_)
-    str_ = re.sub(r'\'d', ' \'d', str_)
-    str_ = re.sub(r'\'ll', ' \'ll', str_)
-    
-    # lower case
-    return str_.strip().lower().split()
 
 class NCEData(object):
     """An infinite, parallel (multiprocess) batch generator for
