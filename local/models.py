@@ -180,7 +180,7 @@ class PVDBOW(nn.Module):
         """
         Saving the model.
     
-        BEWARE: simply saving the weights, distinct from the save_training_state util.
+        WARNING: simply saving the weights, distinct from the save_training_state util.
         """
      
         vocab_name = "vocab_" + name
@@ -385,7 +385,6 @@ class PVDM(nn.Module):
 
         # optimizer 
         optimizer = Adam(params=self.parameters(),lr=self.lr)
-        #optimizer = SGD(params=self.parameters(),lr=self.lr)
 
         # entering the main loop
         t_start = time.time()

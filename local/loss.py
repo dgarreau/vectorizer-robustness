@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 
-Loss function, without fancy stuff.
+Loss function. 
 
 """
 

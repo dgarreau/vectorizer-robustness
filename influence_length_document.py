@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 
-Script for the influence of document length experiments. Use train_model.py to
-train the vectorizer first. 
+Script for the influence of document length experiments. 
+
+WARNING: run train_model.py to train / calibrate the vectorizers first. 
 
 """
 
@@ -23,7 +24,7 @@ from utils import MODELS_DIR,RESULTS_DIR
 from utils import load_dataset
 from utils import mkdir
 
-# fix the seed
+# set the seed
 seed = 0
 random.seed(seed)
 np.random.seed(seed)

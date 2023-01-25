@@ -2,7 +2,21 @@
 # -*- coding: utf-8 -*-
 """
 
-Training the models.
+Training / calibrating the models. Only dataset available is IMDB.
+
+Implementations are:
+ - scikit: using scikit-learn implmentation (for TFIDF)
+ - local: local implementation of PV
+ - gensim: external implementation of PV
+ 
+WARNING: local implementation is very slow, even on GPU. Moreover, step size 
+needs to be tuned. 
+
+Models are:
+ - TFIDF
+ - PVDMmean
+ - PVDMconcat
+ - PVDBOW
 
 WARNING: with the gensim implementation, taking hs=0 and negative=0 does not do
 what you think it does and may result in strange results, see 
@@ -28,15 +42,15 @@ from utils import MODELS_DIR, mkdir
 # create folder to save data
 mkdir(MODELS_DIR)
 
-# fix the seed
+# setthe seed
 seed = 0
 random.seed(seed)
 np.random.seed(seed)
 
 # parameters of the experiment
 data   = "IMDB"
-implem = "gensim"# scikit, gensim, local
-model  = "PVDBOW"# TFIDF, PVDMmean, PVDMconcat, PVDBOW
+implem = "gensim"
+model  = "PVDBOW"
 
 # unique identifier
 vectorizer_name = get_vectorizer_name(data,implem,model)

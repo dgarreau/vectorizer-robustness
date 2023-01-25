@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 
-Plot results. 
+Plot results for the influence of document length experiment. 
 
 """
 

@@ -20,7 +20,7 @@ from utils import MODELS_DIR,RESULTS_DIR,FIGS_DIR
 from utils import mkdir
 from utils import load_dataset
 
-# fix the seed
+# set the seed
 seed = 0
 random.seed(seed)
 np.random.seed(seed)

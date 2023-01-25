@@ -23,7 +23,6 @@ def global_neighborhood(T,winsize=5):
     OUTPUT:
         (T-2*winsize,2*winsize) array with all neighborhood indices
     
-    np.sum(P_matrix[:,global_context],axis=2).T
     """
     aux_0 = np.arange(winsize)
     aux_1 = np.ones((T-2*winsize,2*winsize),dtype=int)
@@ -156,9 +155,6 @@ def global_gradient(q_vec,
                     winsize=5):
     """
     All gradients.
-    
-    TODO:
-        R dot ind can be replaced by direct access
     """
     D,dim = R_matrix.shape
     aux_s = global_softmax(q_vec,example,R_matrix,model=model,P_matrix=P_matrix,winsize=winsize)

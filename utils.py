@@ -4,15 +4,15 @@
 
 Utils.
 
-Credits to https://github.com/inejc/paragraph-vectors for the datainterface.
+Kudos to https://github.com/inejc/paragraph-vectors for the data interface and
+https://stackoverflow.com/questions/11373610/save-matplotlib-file-to-a-directory
+for mkdir.
 
 """
 
 import re
 import random
 import urllib.request
-import tarfile
-import shutil
 import numpy as np
 import gensim
 import sys
@@ -20,19 +20,19 @@ import smart_open
 import pandas as pd
 
 from os.path import join
-from os import makedirs, path, remove
+from os import makedirs, path
 import configparser
 
 from errno import EEXIST
 
 from torchtext.legacy.data import Field, TabularDataset
 
-# fix the seed
+# set the seed
 seed = 0
 random.seed(seed)
 np.random.seed(seed)
 
-# change here for local use
+# getting local config
 config = configparser.ConfigParser()
 config.read('config.ini')
 _root_dir = path.expanduser(config.get('files', 'root_path'))
@@ -47,10 +47,7 @@ def get_vectorizer_name(data,implem,model):
 
 def mkdir(mypath):
     """
-    Creates a directory (credits to https://stackoverflow.com/questions/11373610/save-matplotlib-file-to-a-directory)
-    
-    INPUT:
-        - mypath: str with path to the directory    
+    Creates a directory.
     """
     try:
         makedirs(mypath)
@@ -168,28 +165,3 @@ def download_IMDB_dataset():
         print('Done!')
     else:
         print('IMDB dataset already downloaded')
-
-    # # Extract the dataset
-    # if not path.exists(path.join(DATA_DIR, 'aclImdb')):
-    #     print('Extracting IMDB dataset...')
-    #     with tarfile.open(filepath, 'r') as ref:
-    #         ref.extractall(DATA_DIR)
-    #     print('Done!')
-
-    # # Move the dataset to the data folder
-    # if not path.exists(path.join(DATA_DIR, 'IMDB-Dataset.csv')):
-    #     print('Moving IMDB dataset...')
-    #     shutil.move(path.join(DATA_DIR, 'aclImdb', 'train', 'GOODFILE??'), path.join(DATA_DIR, 'IMDB-Dataset.csv'))
-    #     print('Done!')
-
-    # # Remove the extracted dataset
-    # if path.exists(path.join(DATA_DIR, 'aclImdb')):
-    #     print('Removing extracted IMDB dataset...')
-    #     shutil.rmtree(path.join(DATA_DIR, 'aclImdb'))
-    #     print('Done!')
-
-    # # Remove the zip file
-    # if path.exists(filepath):
-    #     print('Removing zip file...')
-    #     remove(filepath)
-    #     print('Done!')

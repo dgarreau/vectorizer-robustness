@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 
-Plot results for number of replacements. 
+Plot results for the number of replacements experiment. 
 
 """
 
