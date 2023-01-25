@@ -28,7 +28,7 @@ np.random.seed(seed)
 # parameters of the experiment
 data    = "IMDB"
 implem  = "gensim"
-model   = "PVDMmean"
+model   = "PVDBOW"
 
 winsize = 5
 
@@ -88,30 +88,24 @@ for ex in examples:
 
 # plot params
 alpha = 0.5
-small_fs = 15
-large_fs = 25
+small_fs = 25
+large_fs = 35
 lw = 3
 
-fig,ax = plt.subplots(1,1,figsize=(10,10))
+fig,ax = plt.subplots(1,1,figsize=(10,8))
 
 for ex in examples:
     ax.plot(norm_dict[ex])
 
 # setting up the figure title and file name
-s_title = model + " norm $q_0$"
+s_title = model + ", norm of $q_0$"
 fig_name = join(figs_dir,vectorizer_name + ".pdf")
 ax.set_title(s_title,fontsize=large_fs)
 
 ax.set_xlabel("length of the document",fontsize=small_fs)
 ax.set_ylabel(r"norm of $q_0$",fontsize=small_fs)
 
+ax.tick_params(labelsize=small_fs)
+
 fig.savefig(fig_name)
-
-
-
-
-
-
-
-
 
