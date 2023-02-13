@@ -60,7 +60,7 @@ def mkdir(mypath):
             raise
 
 
-def load_dataset(data, implem, verbose=False, split_ratio=0.1):
+def load_dataset(data, implem, verbose=False, split_ratio=None):
 
     if verbose:
         print("loading data...")
