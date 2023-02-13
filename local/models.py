@@ -23,7 +23,7 @@ from torch.optim import Adam
 
 from os.path import join
 
-from .data import NCEData
+from .data import NCEGenerator
 from .loss import LogSoftmax
 from .inference import compute_embedding
 
@@ -77,17 +77,13 @@ class PVDBOW(nn.Module):
         self.num_workers = num_workers
 
         num_noise_words = 0
-        nce_data = NCEData(
+        nce_generator = NCEGenerator(
             dataset,
             self.batch_size,
             self.context_size,
             num_noise_words,
-            self.max_generated_batches,
-            self.num_workers,
         )
-        nce_data.start()
-        n_batches = len(nce_data)
-        data_generator = nce_data.get_generator()
+        n_batches = len(nce_generator)
 
         self.vocabulary = dataset.fields["text"].vocab
 
@@ -134,7 +130,7 @@ class PVDBOW(nn.Module):
             loss = []
 
             for i_batch in range(n_batches):
-                batch = next(data_generator)
+                batch = next(nce_generator)
                 if torch.cuda.is_available():
                     batch.cuda_()
                 x = self.forward(batch.context_ids, batch.doc_ids)
@@ -352,17 +348,14 @@ class PVDM(nn.Module):
 
         # data stream for the training, no noise for us
         num_noise_words = 0
-        nce_data = NCEData(
+        nce_generator = NCEGenerator(
             dataset,
             self.batch_size,
             self.context_size,
             num_noise_words,
             self.max_generated_batches,
-            self.num_workers,
         )
-        nce_data.start()
-        n_batches = len(nce_data)
-        data_generator = nce_data.get_generator()
+        n_batches = len(nce_generator)
 
         self.vocabulary = dataset.fields["text"].vocab
 
@@ -446,7 +439,7 @@ class PVDM(nn.Module):
 
             for i_batch in range(n_batches):
 
-                batch = next(data_generator)
+                batch = next(nce_generator)
 
                 if torch.cuda.is_available():
                     batch.cuda_()
