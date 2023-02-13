@@ -84,8 +84,7 @@ def load_dataset(data, implem, verbose=False, split_ratio=None):
         if implem == "new_local":
             # FIXME: randomize and include train also
             dataset = IMDB(DATA_DIR, split="train")
-            #dataset = Subset(dataset, range(int(split_ratio * n_docs)))
-            tokenizer = get_tokenizer('basic_english')
+            tokenizer = _tokenize_str#get_tokenizer('basic_english')
 
             n_train = int(split_ratio * n_docs)
             counter = Counter()
@@ -95,12 +94,14 @@ def load_dataset(data, implem, verbose=False, split_ratio=None):
                     counter.update(tokenizer(line))
                 else:
                     break
-            vocabulary = vocab(counter, min_freq=1)
+            vocabulary = vocab(counter, min_freq=1, specials=('<unk>'))
+            vocabulary.set_default_index(-1)
 
             dataset = {
-                "dataset": dataset,
+                "dataset": list(dataset)[:n_train], #HACK: bad for large dataset!
                 "vocab": vocabulary,
                 "counter": counter,
+                "tokenizer": tokenizer,
             }
 
         elif implem == "local":

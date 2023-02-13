@@ -21,6 +21,8 @@ from utils import MODELS_DIR
 from sys import stdout
 
 from torch.optim import Adam
+from torch.utils.data import DataLoader
+
 
 # from torchtext.legacy.data import Example,Field,Dataset
 
@@ -65,7 +67,7 @@ class PVDBOW(nn.Module):
     def train(
         self,
         dataset,
-        lr=0.001,
+        lr=0.002,
         n_epochs=100,
         batch_size=32,
         max_generated_batches=1,
@@ -88,9 +90,9 @@ class PVDBOW(nn.Module):
         )
         n_batches = len(nce_generator)
 
-        self.vocabulary = dataset.fields["text"].vocab
+        self.vocabulary = dataset["vocab"]
 
-        self.n_docs = len(dataset)
+        self.n_docs = len(dataset["dataset"])
         self.n_words = len(self.vocabulary)
 
         # parameters of the model
@@ -132,18 +134,18 @@ class PVDBOW(nn.Module):
             epoch_start = time.time()
             loss = []
 
-            for i_batch in range(n_batches):
-                batch = next(nce_generator)
-                if torch.cuda.is_available():
-                    batch.cuda_()
-                x = self.forward(batch.context_ids, batch.doc_ids)
-                x = cost_func.forward(x, batch.target_noise_ids)
-                loss.append(x.item())
-                self.zero_grad()
-                x.backward()
-                optimizer.step()
-                if verbose:
-                    _print_progress(i_epoch, i_batch, n_batches)
+            for i_batch, batch in enumerate(nce_generator):
+                context_ids, doc_ids, target_noise_ids = batch
+                print(doc_ids)
+                if len(doc_ids.size()) == 0:
+                    x = self.forward(context_ids, doc_ids)
+                    x = cost_func.forward(x, target_noise_ids)
+                    loss.append(x.item())
+                    self.zero_grad()
+                    x.backward()
+                    optimizer.step()
+                    if verbose:
+                        _print_progress(i_epoch, i_batch, n_batches)
 
             # end of epoch
             loss = torch.mean(torch.FloatTensor(loss))
@@ -360,7 +362,7 @@ class PVDM(nn.Module):
         )
         n_batches = len(nce_generator)
 
-        self.vocabulary = dataset.fields["text"].vocab
+        self.vocabulary = dataset['vocab']
 
         self.n_docs = len(dataset)
         self.n_words = len(self.vocabulary)

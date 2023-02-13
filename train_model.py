@@ -56,7 +56,7 @@ model = "PVDBOW"
 vectorizer_name = get_vectorizer_name(data, implem, model)
 
 # load data
-dataset = load_dataset(data, implem, verbose=True)
+dataset = load_dataset(data, implem, split_ratio = 0.001, verbose=True)
 
 # instanciate the model
 winsize = 5
