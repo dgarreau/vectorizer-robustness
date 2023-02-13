@@ -24,12 +24,13 @@ class NCEGenerator:
     """
 
     def __init__(self, dataset, batch_size, context_size, num_noise_words, state=None):
-        self.dataset = dataset
+        self.dataset = dataset["dataset"]
         self.batch_size = batch_size
         self.context_size = context_size
         self.num_noise_words = num_noise_words
 
-        self._vocabulary = self.dataset.fields["text"].vocab
+        self._vocabulary = dataset["vocab"]
+        self._counter = dataset["counter"]
         self._sample_noise = None
         self._init_noise_distribution()
         if not state:
@@ -41,8 +42,8 @@ class NCEGenerator:
         # of Words and Phrases and their Compositionality
         probs = np.zeros(len(self._vocabulary) - 1)
 
-        for word, freq in self._vocabulary.freqs.items():
-            probs[self._word_to_index(word)] = freq
+        for word in self._counter:
+            probs[self._word_to_index(word)] = self._counter[word] # frequency
 
         probs = np.power(probs, 0.75)
         probs /= np.sum(probs)
@@ -88,7 +89,6 @@ class NCEGenerator:
                 prev_in_doc_pos = self.context_size
 
         batch.torch_()
-        import pdb; pdb.set_trace()
         return batch
 
     def _num_examples_in_doc(self, doc, in_doc_pos=None):
@@ -128,7 +128,7 @@ class NCEGenerator:
         batch.context_ids.append(current_context)
 
     def _word_to_index(self, word):
-        return self._vocabulary.stoi[word] - 1
+        return self._vocabulary[word] - 1
 
 
 class _NCEGeneratorState:

@@ -18,6 +18,7 @@ import gensim
 import sys
 import smart_open
 import pandas as pd
+from collections import Counter
 
 from os.path import join
 from os import makedirs, path
@@ -25,7 +26,12 @@ import configparser
 
 from errno import EEXIST
 
-from torchtext.legacy.data import Field, TabularDataset
+from torch.utils.data import Subset
+
+# from torchtext.legacy.data import Field, TabularDataset # TODO: to remove after newimplem
+from torchtext.datasets import IMDB
+from torchtext.data.utils import get_tokenizer
+from torchtext.vocab import vocab
 
 # set the seed
 seed = 0
@@ -61,6 +67,9 @@ def mkdir(mypath):
 
 
 def load_dataset(data, implem, verbose=False, split_ratio=None):
+    # taking only 1000 doc
+    if not split_ratio:
+        split_ratio = 0.02
 
     if verbose:
         print("loading data...")
@@ -72,11 +81,30 @@ def load_dataset(data, implem, verbose=False, split_ratio=None):
         if not path.exists(file_path):
             download_IMDB_dataset()
 
-        if implem == "local":
+        if implem == "new_local":
+            # FIXME: randomize and include train also
+            dataset = IMDB(DATA_DIR, split="train")
+            #dataset = Subset(dataset, range(int(split_ratio * n_docs)))
+            tokenizer = get_tokenizer('basic_english')
 
-            # taking only 1000 doc
-            if not split_ratio:
-                split_ratio = 0.02
+            n_train = int(split_ratio * n_docs)
+            counter = Counter()
+            cur_n = 0
+            for (label, line) in dataset:
+                if cur_n < n_train:
+                    counter.update(tokenizer(line))
+                else:
+                    break
+            vocabulary = vocab(counter, min_freq=1)
+
+            dataset = {
+                "dataset": dataset,
+                "vocab": vocabulary,
+                "counter": counter,
+            }
+
+        elif implem == "local":
+
             text_field = Field(pad_token=None, tokenize=_tokenize_str)
             class_field = Field()
             initial = TabularDataset(

@@ -8,6 +8,9 @@ kudos to https://github.com/inejc/paragraph-vectors
 
 """
 
+# TODO Abstract PVDBOW / PDVM in one class and derive it
+# TODO (carefuly) implement 1/T
+
 import torch
 import torch.nn as nn
 import time

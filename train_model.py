@@ -49,7 +49,7 @@ np.random.seed(seed)
 
 # parameters of the experiment
 data = "IMDB"
-implem = "gensim"
+implem = "new_local"
 model = "PVDBOW"
 
 # unique identifier
@@ -128,7 +128,7 @@ elif implem == "scikit":
     else:
         print("not implemented")
 
-elif implem == "local":
+elif implem == "new_local":
 
     dim = 50
     winsize = 5

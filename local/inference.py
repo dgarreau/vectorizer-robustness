@@ -194,7 +194,7 @@ def gradient_helper(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, win
     )
     return np.sum(all_grad, axis=1)
 
-
+# TODO: Transform it in Torch code
 def compute_gradient(
     q_vec,
     example_orig,
