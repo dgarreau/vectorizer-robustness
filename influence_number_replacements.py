@@ -80,6 +80,7 @@ elif implem == "local":
 n_rep = 5
 n_simu = 50
 examples = [0, 1, 3, 7, 10]
+
 for ex in examples:
     print("looking at example {}".format(ex))
 
@@ -91,8 +92,8 @@ for ex in examples:
         ex_orig = dataset[ex]
         ex_orig_list = ex_orig.split(" ")
     elif implem == "local":
-        ex_orig = dataset[ex]
-        ex_orig_list = ex_orig.copy()
+        ex_orig = dataset[0][ex]
+        ex_orig_list = ex_orig.detach() #TODO do i need this detach?
     T = len(ex_orig_list)
 
     # original embedding
@@ -114,12 +115,16 @@ for ex in examples:
         for i_simu in range(n_simu):
             pert_ind = list(random.sample(range(T), n_rep))
             new_words = list(np.random.randint(0, D, size=(n_rep,)))
-            ex_new_list = ex_orig_list.copy()
+            ex_new_list = ex_orig_list#.copy() #TODO do i need to cpy?
 
             # replace words at random
             for i_rep in range(n_rep):
-                ex_new_list[pert_ind[i_rep]] = vocab[new_words[i_rep]]
-            ex_new = " ".join(ex_new_list)
+                if implem == "local":
+                    ex_new_list[pert_ind[i_rep]] = new_words[i_rep]
+                    ex_new = ex_new_list
+                else:
+                    ex_new_list[pert_ind[i_rep]] = vocab[new_words[i_rep]]
+                    ex_new = " ".join(ex_new_list)
 
             # compute the new embedding
             if implem == "gensim":

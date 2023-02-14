@@ -58,19 +58,19 @@ def global_context_vectors(example, P_matrix, model, winsize=5):
         (dim,T-2*winsize) array with all context vectors
     """
     gc = global_context(example, winsize=winsize)
-    if model == "PVDMconcat":
+    if model == ParagraphVectorVariant.PVDMconcat:
         T = len(example)
         D = int(P_matrix.shape[1] / (2 * winsize))
         indices = gc + D * repmat(np.arange(2 * winsize), T - 2 * winsize, 1)
         return np.sum(P_matrix[:, indices], axis=2)
-    elif model == "PVDMmean":
+    elif model == ParagraphVectorVariant.PVDMmean:
         return np.sum(P_matrix[:, gc], axis=2)
     else:
         print("Not implemented!")
         return 0
 
 
-def global_softmax(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, winsize=5):
+def global_softmax(q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW, P_matrix=None, winsize=5):
     """
     All the softmax values for the doc.
 
@@ -78,10 +78,10 @@ def global_softmax(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, wins
         (D,T-2*winsize) array with all softmax values
     """
     T = len(example)
-    if model == "PVDBOW":
+    if model == ParagraphVectorVariant.PVDBOW:
         aux_h = repmat(np.dot(R_matrix, q_vec), T - 2 * winsize, 1).T
         sm = softmax(aux_h, axis=0)
-    elif model == "PVDMmean" or model == "PVDMconcat":
+    elif model == ParagraphVectorVariant.PVDMmean or model == ParagraphVectorVariant.PVDMconcat:
         gcv = global_context_vectors(example, P_matrix, model=model, winsize=winsize)
         aux_h = (
             np.dot(R_matrix, gcv)
@@ -93,7 +93,7 @@ def global_softmax(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, wins
     return sm
 
 
-def global_psi(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, winsize=5):
+def global_psi(q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW, P_matrix=None, winsize=5):
     """
     All values of \psi
     """
@@ -106,7 +106,7 @@ def global_psi(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, winsize=
 
 
 def objective_helper(
-    q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, winsize=5
+    q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW, P_matrix=None, winsize=5
 ):
     """
     Value of the objective function.
@@ -121,7 +121,7 @@ def compute_objective(
     q_vec,
     example_orig,
     R_matrix,
-    model="PVDBOW",
+    model=ParagraphVectorVariant.PVDBOW,
     P_matrix=None,
     mode="true",
     example_new=None,
@@ -175,7 +175,7 @@ def global_indic(example, D, winsize=5):
     return aux_1
 
 
-def global_gradient(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, winsize=5):
+def global_gradient(q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW, P_matrix=None, winsize=5):
     """
     All gradients.
     """
@@ -187,7 +187,7 @@ def global_gradient(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, win
     return np.dot(R_matrix.T, aux_s - aux_1)
 
 
-def gradient_helper(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, winsize=5):
+def gradient_helper(q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW, P_matrix=None, winsize=5):
     """
     Return the full gradient at the point.
     """
