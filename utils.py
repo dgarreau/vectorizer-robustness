@@ -104,26 +104,6 @@ def load_dataset(data, implem, verbose=False, split_ratio=None):
                 "tokenizer": tokenizer,
             }
 
-        elif implem == "local":
-
-            text_field = Field(pad_token=None, tokenize=_tokenize_str)
-            class_field = Field()
-            initial = TabularDataset(
-                path=file_path,
-                format="csv",
-                fields=[("text", text_field), ("label", class_field)],
-                skip_header=True,
-            )
-
-            dataset, _ = initial.split(
-                split_ratio=split_ratio, random_state=random.getstate()
-            )
-
-            if verbose:
-                print("building vocabulary...")
-            text_field.build_vocab(dataset)
-            if verbose:
-                print("done!")
         elif implem == "gensim":
 
             dataset = list(read_corpus(file_path, int(split_ratio * n_docs)))

@@ -28,7 +28,7 @@ from torch.utils.data import DataLoader
 
 from os.path import join
 
-from .data import NCEGenerator
+from .data import ContexifiedDataSet, NCEGenerator
 from .loss import LogSoftmax
 from .inference import compute_embedding
 
@@ -82,13 +82,15 @@ class PVDBOW(nn.Module):
         self.num_workers = num_workers
 
         num_noise_words = 0
-        nce_generator = NCEGenerator(
-            dataset,
-            self.batch_size,
-            self.context_size,
-            num_noise_words,
-        )
-        n_batches = len(nce_generator)
+        ctx_dataset = ContexifiedDataSet(dataset["dataset"],
+                                         self.context_size,
+                                         dataset["tokenizer"],
+                                         dataset["vocab"],
+                                         dataset["counter"],
+                                         num_noise_words=0
+                                         )
+        dataloader = DataLoader(ctx_dataset, self.batch_size)
+        n_batches = len(dataloader)
 
         self.vocabulary = dataset["vocab"]
 
@@ -134,18 +136,16 @@ class PVDBOW(nn.Module):
             epoch_start = time.time()
             loss = []
 
-            for i_batch, batch in enumerate(nce_generator):
+            for i_batch, batch in enumerate(dataloader):
                 context_ids, doc_ids, target_noise_ids = batch
-                print(doc_ids)
-                if len(doc_ids.size()) == 0:
-                    x = self.forward(context_ids, doc_ids)
-                    x = cost_func.forward(x, target_noise_ids)
-                    loss.append(x.item())
-                    self.zero_grad()
-                    x.backward()
-                    optimizer.step()
-                    if verbose:
-                        _print_progress(i_epoch, i_batch, n_batches)
+                x = self.forward(context_ids, doc_ids)
+                x = cost_func.forward(x, target_noise_ids)
+                loss.append(x.item())
+                self.zero_grad()
+                x.backward()
+                optimizer.step()
+                if verbose:
+                    _print_progress(i_epoch, i_batch, n_batches)
 
             # end of epoch
             loss = torch.mean(torch.FloatTensor(loss))
