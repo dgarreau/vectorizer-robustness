@@ -11,6 +11,7 @@ kudos to https://github.com/inejc/paragraph-vectors
 # TODO Abstract PVDBOW / PDVM in one class and derive it
 # TODO (carefuly) implement 1/T
 
+import pdb
 import torch
 import torch.nn as nn
 import time
@@ -28,7 +29,7 @@ from torch.utils.data import DataLoader
 
 from os.path import join
 
-from .data import ContexifiedDataSet, NCEGenerator
+from .data import ContexifiedDataSet
 from .loss import LogSoftmax
 from .inference import compute_embedding
 
@@ -78,7 +79,6 @@ class PVDBOW(nn.Module):
         self.lr = lr
         self.n_epochs = n_epochs
         self.batch_size = batch_size
-        self.max_generated_batches = max_generated_batches
         self.num_workers = num_workers
 
         num_noise_words = 0
@@ -86,8 +86,6 @@ class PVDBOW(nn.Module):
                                          self.context_size,
                                          dataset["tokenizer"],
                                          dataset["vocab"],
-                                         dataset["counter"],
-                                         num_noise_words=0
                                          )
         dataloader = DataLoader(ctx_dataset, self.batch_size)
         n_batches = len(dataloader)
@@ -137,9 +135,9 @@ class PVDBOW(nn.Module):
             loss = []
 
             for i_batch, batch in enumerate(dataloader):
-                context_ids, doc_ids, target_noise_ids = batch
+                context_ids, doc_ids, dummy = batch
                 x = self.forward(context_ids, doc_ids)
-                x = cost_func.forward(x, target_noise_ids)
+                x = cost_func.forward(x, dummy)
                 loss.append(x.item())
                 self.zero_grad()
                 x.backward()

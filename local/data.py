@@ -20,16 +20,13 @@ class ContexifiedDataSet(Dataset):
     """ Take an arbitrary dataset of documents and transform it chunk of contexts
     """
 
-    def __init__(self, dataset, ctx_size, tokenizer, vocabulary, counter, num_noise_words = 0, txt_idx=1):
+    def __init__(self, dataset, ctx_size, tokenizer, vocabulary, txt_idx=1):
         self.dataset = dataset
-        self.num_noise_words = num_noise_words
         self._tokenizer = tokenizer
         self._vocabulary = vocabulary
-        self._counter = counter
         # HACK: transform into list the original dataset. BAD if large.
         self.data = list(map(lambda e: torch.tensor([self._vocabulary[token] for token in self._tokenizer(e[txt_idx])]), list(self.dataset)))
         self.ctx_size = ctx_size
-        self._sample_noise = self._init_noise_distribution()
 
         self._number_doc = len(self.data)
 
@@ -48,7 +45,7 @@ class ContexifiedDataSet(Dataset):
         doc_id = torch.searchsorted(self._cumulative_number_examples, idx+1)
         doc_t = self.data[doc_id]
         ctx_idx = idx - self._cumulative_number_examples[doc_id-1] if doc_id > 0 else idx
-        return (self._ctx_at(doc_t, ctx_idx), doc_id, self._sample_noise())
+        return (self._ctx_at(doc_t, ctx_idx), doc_id, torch.tensor([], dtype=torch.long))
 
 
     def _ctx_at(self, doc, ctx_id):
@@ -64,17 +61,3 @@ class ContexifiedDataSet(Dataset):
             # Total number of contexts in doc_t
             num = max(0, len(doc_t) - 2 * self.ctx_size)
         return num
-
-    def _init_noise_distribution(self):
-        # we use a unigram distribution raised to the 3/4rd power,
-        # as proposed by T. Mikolov et al. in Distributed Representations
-        # of Words and Phrases and their Compositionality
-        probs = np.zeros(len(self._vocabulary) - 1)
-
-        for word in self._counter:
-            probs[self._vocabulary[word]-1] = self._counter[word] # frequency
-
-        probs = np.power(probs, 0.75)
-        probs /= np.sum(probs)
-
-        return (lambda: torch.tensor(choice(probs.shape[0], self.num_noise_words, p=probs)))
