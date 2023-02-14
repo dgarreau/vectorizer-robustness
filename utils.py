@@ -82,7 +82,7 @@ def load_dataset(data, implem, verbose=False, split_ratio=None):
         if not path.exists(file_path):
             download_IMDB_dataset()
 
-        if implem == "new_local":
+        if implem == "local":
             # FIXME: randomize and include train also
             dataset = IMDB(DATA_DIR, split="train")
             tokenizer = _tokenize_str#get_tokenizer('basic_english')

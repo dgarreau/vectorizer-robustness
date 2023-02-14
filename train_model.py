@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     # parameters of the experiment
     data = "IMDB"
-    implem = "new_local"
+    implem = "local"
     model = "PVDBOW"
 
     # unique identifier
