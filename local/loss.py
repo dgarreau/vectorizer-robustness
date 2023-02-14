@@ -21,6 +21,9 @@ class LogSoftmax(nn.Module):
 
         aux = -self._log_sigmoid(scores)
 
-        probas = aux[torch.arange(batch_size), torch.transpose(target_ids, 0, 1)]
+        # import pdb; pdb.set_trace()
+        #probas = aux[torch.arange(batch_size), torch.transpose(target_ids, 0, 1)]
+        #HACK: remove transpose
+        probas = aux[torch.arange(batch_size), target_ids]
 
         return torch.sum(probas)
