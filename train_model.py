@@ -32,7 +32,7 @@ import pickle
 
 from os.path import join
 
-from local.models import PVDM, PVDBOW
+from local.models import ParagraphVector, ParagraphVectorVariant
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from utils import get_vectorizer_name
@@ -138,13 +138,13 @@ if __name__ == '__main__':
 
         if model == "PVDMmean":
             lr = 0.001
-            vectorizer = PVDM(dim=dim, context_size=winsize, concat=False)
+            vectorizer = ParagraphVector(dim=dim, context_size=winsize, variant=ParagraphVectorVariant.PVDMmean)
         elif model == "PVDMconcat":
             lr = 0.0005
-            vectorizer = PVDM(dim=dim, context_size=winsize, concat=True)
+            vectorizer = ParagraphVector(dim=dim, context_size=winsize, variant=ParagraphVectorVariant.PVDMconcat)
         elif model == "PVDBOW":
             lr = 0.001
-            vectorizer = PVDBOW(dim=dim, context_size=winsize)
+            vectorizer = ParagraphVector(dim=dim, context_size=winsize, variant=ParagraphVectorVariant.PVDBOW)
 
         # training the model
         vectorizer.train(dataset, lr=lr, n_epochs=n_epochs, verbose=True)
