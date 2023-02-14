@@ -55,7 +55,7 @@ class ParagraphVectorVariant(Enum):
 
 
 class ParagraphVector(nn.Module):
-    def __init__(self, dim=None, context_size=5,
+    def __init__(self, dim=50, context_size=5,
                  variant=ParagraphVectorVariant.PVDBOW):
         super(ParagraphVector, self).__init__()
         self.dim = dim
@@ -193,7 +193,6 @@ class ParagraphVector(nn.Module):
         t_start = time.time()
         loss_values = []
         for i_epoch in range(n_epochs):
-
             epoch_start = time.time()
             loss = []
             i_batch = 0 # enumerate is bad for multiprocessing?
@@ -242,21 +241,6 @@ class ParagraphVector(nn.Module):
         Get R matrix as numpy array.
         """
         return self._R_matrix.cpu().detach().numpy().T
-
-    def get_n_docs(self):
-        return self.n_docs
-
-    def get_n_words(self):
-        return self.n_words
-
-    def get_context_size(self):
-        return self.context_size
-
-    def get_dim(self):
-        return self.dim
-
-    def is_concat(self):
-        return self.concat
 
     def load(self, name, verbose=False):
         """

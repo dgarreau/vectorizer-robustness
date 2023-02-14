@@ -71,9 +71,9 @@ elif implem == "scikit":
     D = len(vocab)
     dim = D
 elif implem == "local":
-    winsize = vectorizer.get_context_size()
-    dim = vectorizer.get_dim()
-    D = vectorizer.get_n_words()
+    winsize = vectorizer.context_size
+    dim = vectorizer.dim
+    D = vectorizer.n_words
     vocab = vectorizer.vocabulary.itos
 
 # main loop
