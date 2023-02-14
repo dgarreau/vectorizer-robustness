@@ -95,6 +95,7 @@ def load_dataset(data, implem, verbose=False, split_ratio=None):
                     counter.update(tokenizer(line))
                 else:
                     break
+                cur_n += 1
             vocabulary = vocab(counter, min_freq=1, specials=('<unk>'))
             vocabulary.set_default_index(-1)
 

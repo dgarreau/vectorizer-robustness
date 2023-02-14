@@ -130,7 +130,7 @@ if __name__ == '__main__':
         else:
             print("not implemented")
 
-    elif implem == "new_local":
+    elif implem == "local":
 
         dim = 50
         winsize = 5
@@ -147,7 +147,7 @@ if __name__ == '__main__':
             vectorizer = PVDBOW(dim=dim, context_size=winsize)
 
         # training the model
-        vectorizer.train(dataset, lr=lr, n_epochs=n_epochs, batch_size=32, verbose=True)
+        vectorizer.train(dataset, lr=lr, n_epochs=n_epochs, verbose=True)
 
         # saving the model
         vectorizer.save(vectorizer_name, verbose=True)

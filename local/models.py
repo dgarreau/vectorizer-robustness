@@ -111,12 +111,12 @@ class PVDBOW(nn.Module):
                 print("using cuda")
                 print()
 
-            print("PVDBOW training starts:")
-            print("N = {:d}".format(self.n_docs))
-            print("D = {:d}".format(self.n_words))
-            print("d = {:d}".format(self.dim))
-            print("lr = {:.4f}".format(self.lr))
-            print()
+        print("PVDBOW training starts:")
+        print("N = {:d}".format(self.n_docs))
+        print("D = {:d}".format(self.n_words))
+        print("d = {:d}".format(self.dim))
+        print("lr = {:.4f}".format(self.lr))
+        print()
 
         # loss function
         cost_func = LogSoftmax()
