@@ -12,6 +12,8 @@ from scipy.special import softmax
 
 from numpy.matlib import repmat
 
+from . import ParagraphVectorVariant
+
 
 def global_neighborhood(T, winsize=5):
     """
@@ -199,7 +201,7 @@ def compute_gradient(
     q_vec,
     example_orig,
     R_matrix,
-    model="PVDBOW",
+    model=ParagraphVectorVariant.PVDBOW,
     P_matrix=None,
     mode="true",
     example_new=None,
@@ -213,7 +215,7 @@ def compute_gradient(
     D, dim = R_matrix.shape
     T = len(example_orig)
 
-    if model == "PVDBOW":
+    if model == ParagraphVectorVariant.PVDBOW:
         if mode == "true":
             grad = (T - 2 * winsize) * np.dot(
                 R_matrix.T, softmax(np.dot(R_matrix, q_vec))
@@ -230,7 +232,7 @@ def compute_gradient(
 
         else:
             print("not implemented!")
-    elif model == "PVDMmean" or model == "PVDMconcat":
+    elif model == ParagraphVectorVariant.PVDMmean or model == ParagraphVectorVariant.PVDMconcat:
         if mode == "true":
             grad = gradient_helper(
                 q_vec,
@@ -269,7 +271,7 @@ def compute_gradient(
 def compute_embedding(
     example_orig,
     R_matrix,
-    model="PVDBOW",
+    model=ParagraphVectorVariant.PVDBOW,
     P_matrix=None,
     mode="true",
     example_new=None,
@@ -285,12 +287,12 @@ def compute_embedding(
     Computing the embedding.
     """
     if gamma is None:
-        if model == "PVDMmean" or model == "PVDMconcat":
+        if model == ParagraphVectorVariant.PVDMmean or model == ParagraphVectorVariant.PVDMconcat:
             gamma = 0.01
         else:
             gamma = 0.005
     if n_steps is None:
-        if model == "PVDMmean" or model == "PVDMconcat":
+        if model == ParagraphVectorVariant.PVDMmean or model == ParagraphVectorVariant.PVDMconcat:
             n_steps = 100
         else:
             n_steps = 200

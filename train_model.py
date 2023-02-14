@@ -134,7 +134,7 @@ if __name__ == '__main__':
 
         dim = 50
         winsize = 5
-        n_epochs = 100
+        n_epochs = 2#100
 
         if model == "PVDMmean":
             lr = 0.001

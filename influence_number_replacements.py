@@ -13,7 +13,7 @@ import time
 import pickle
 import numpy as np
 
-from local.models import PVDM, PVDBOW
+from local.models import ParagraphVectorVariant, ParagraphVector
 
 from gensim.models.doc2vec import Doc2Vec
 
@@ -31,7 +31,7 @@ np.random.seed(seed)
 
 # parameters of the experiment
 data = "IMDB"
-implem = "gensim"
+implem = "local"
 model = "PVDBOW"
 
 # get unique identifier and create relevant folder
@@ -48,11 +48,11 @@ elif implem == "scikit":
         vectorizer = pickle.load(f)
 elif implem == "local":
     if model == "PVDMmean":
-        vectorizer = PVDM(concat=False)
+        vectorizer = ParagraphVector(variant=ParagraphVectorVariant.PVDMmean)
     elif model == "PVDMconcat":
-        vectorizer = PVDM(concat=True)
+        vectorizer = ParagraphVector(variant=ParagraphVectorVariant.PVDMconcat)
     elif model == "PVDBOW":
-        PVDBOW()
+        vectorizer = ParagraphVector(variant=ParagraphVectorVariant.PVDBOW)
     vectorizer.load(vectorizer_name)
 
 # load dataset
@@ -74,7 +74,7 @@ elif implem == "local":
     winsize = vectorizer.context_size
     dim = vectorizer.dim
     D = vectorizer.n_words
-    vocab = vectorizer.vocabulary.itos
+    vocab = vectorizer.vocabulary.get_itos()
 
 # main loop
 n_rep = 5
@@ -92,7 +92,7 @@ for ex in examples:
         ex_orig_list = ex_orig.split(" ")
     elif implem == "local":
         ex_orig = dataset[ex]
-        ex_orig_list = ex_orig.text.copy()
+        ex_orig_list = ex_orig.copy()
     T = len(ex_orig_list)
 
     # original embedding

@@ -14,7 +14,6 @@ import torch
 import torch.nn as nn
 import time
 import numpy as np
-from enum import Enum
 
 from utils import MODELS_DIR
 
@@ -29,6 +28,7 @@ from os.path import join
 from .data import ContexifiedDataSet
 from .loss import LogSoftmax
 from .inference import compute_embedding
+from . import ParagraphVectorVariant
 
 
 def _print_progress(epoch_i, batch_i, num_batches):
@@ -36,12 +36,6 @@ def _print_progress(epoch_i, batch_i, num_batches):
     print("\rEpoch {:d}".format(epoch_i + 1), end="")
     stdout.write(" - {:d}%".format(progress))
     stdout.flush()
-
-
-class ParagraphVectorVariant(Enum):
-    PVDBOW = 1
-    PVDMmean = 2
-    PVDMconcat = 3
 
 
 class ParagraphVector(nn.Module):
@@ -132,7 +126,7 @@ class ParagraphVector(nn.Module):
                 requires_grad=True,
             )
         elif self.variant == ParagraphVectorVariant.PVDBOW:
-            self._P_matrix = None
+            self._P_matrix = nn.Parameter(torch.tensor([])) #to be able to save it
         else:
             raise NotImplementedError
 
@@ -317,7 +311,8 @@ class ParagraphVector(nn.Module):
         """
         P_array = self.get_P_matrix()
         R_array = self.get_R_matrix()
-        tokenized_doc = np.array([self.vocabulary.stoi[w] for w in document], dtype=int)
+        stoi = self.vocabulary.get_stoi()
+        tokenized_doc = document#np.array([stoi[w] for w in document], dtype=int)
         q_vec, traj_store, obj_store = compute_embedding(
             tokenized_doc,
             R_array,
