@@ -10,7 +10,7 @@ import numpy as np
 
 from numpy.random import choice
 
-from math import floor
+from math import ceil
 
 from torch.utils.data import DataLoader
 
@@ -61,7 +61,7 @@ class NCEGenerator:
 
     def __len__(self):
         num_examples = sum(self._num_examples_in_doc(d) for d in self.dataset)
-        return floor(num_examples / self.batch_size)
+        return ceil(num_examples / self.batch_size)
 
     def vocabulary_size(self):
         return len(self._vocabulary) - 1
