@@ -29,6 +29,7 @@ from errno import EEXIST
 from torch.utils.data import Subset
 
 # from torchtext.legacy.data import Field, TabularDataset # TODO: to remove after newimplem
+import torch
 from torchtext.datasets import IMDB
 from torchtext.data.utils import get_tokenizer
 from torchtext.vocab import vocab
@@ -97,12 +98,20 @@ def load_dataset(data, implem, verbose=False, split_ratio=None):
             vocabulary = vocab(counter, min_freq=1, specials=('<unk>'))
             vocabulary.set_default_index(-1)
 
+            # HACK: transform into list the original dataset. BAD if large.
+            data = list(map(
+                lambda e: torch.tensor([vocabulary[token]
+                                        for token in tokenizer(e[1])]),
+                list(dataset)[:n_train]))
+
             dataset = {
                 "dataset": list(dataset)[:n_train], #HACK: bad for large dataset!
+                "data": data,
                 "vocab": vocabulary,
                 "counter": counter,
                 "tokenizer": tokenizer,
             }
+
 
         elif implem == "gensim":
 

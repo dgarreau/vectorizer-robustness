@@ -15,17 +15,13 @@ from math import ceil
 from torch.utils.data import DataLoader, Dataset
 
 
-
+# NOTE i tried to cache contexts but the speed improvement is low
 class ContexifiedDataSet(Dataset):
     """ Take an arbitrary dataset of documents and transform it chunk of contexts
     """
 
-    def __init__(self, dataset, ctx_size, tokenizer, vocabulary, txt_idx=1):
-        self.dataset = dataset
-        self._tokenizer = tokenizer
-        self._vocabulary = vocabulary
-        # HACK: transform into list the original dataset. BAD if large.
-        self.data = list(map(lambda e: torch.tensor([self._vocabulary[token] for token in self._tokenizer(e[txt_idx])]), list(self.dataset)))
+    def __init__(self, data, ctx_size):
+        self.data = data
         self.ctx_size = ctx_size
 
         self._number_doc = len(self.data)
@@ -45,7 +41,8 @@ class ContexifiedDataSet(Dataset):
         doc_id = torch.searchsorted(self._cumulative_number_examples, idx+1)
         doc_t = self.data[doc_id]
         ctx_idx = idx - self._cumulative_number_examples[doc_id-1] if doc_id > 0 else idx
-        return (self._ctx_at(doc_t, ctx_idx), doc_id, doc_t[ctx_idx+self.ctx_size]) #torch.tensor([], dtype=torch.long))
+        batch = (self._ctx_at(doc_t, ctx_idx), doc_id, doc_t[ctx_idx+self.ctx_size])
+        return batch
 
 
     def _ctx_at(self, doc, ctx_id):

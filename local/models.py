@@ -82,12 +82,10 @@ class PVDBOW(nn.Module):
         self.num_workers = num_workers
 
         num_noise_words = 0
-        ctx_dataset = ContexifiedDataSet(dataset["dataset"],
+        ctx_dataset = ContexifiedDataSet(dataset["data"],
                                          self.context_size,
-                                         dataset["tokenizer"],
-                                         dataset["vocab"],
                                          )
-        dataloader = DataLoader(ctx_dataset, self.batch_size)
+        dataloader = DataLoader(ctx_dataset, self.batch_size, num_workers=self.num_workers)
         n_batches = len(dataloader)
 
         self.vocabulary = dataset["vocab"]
@@ -133,8 +131,8 @@ class PVDBOW(nn.Module):
 
             epoch_start = time.time()
             loss = []
-
-            for i_batch, batch in enumerate(dataloader):
+            i_batch = 0 # enumerate is bad for multiprocessing?
+            for batch in dataloader:
                 context_ids, doc_ids, dummy = batch
                 x = self.forward(context_ids, doc_ids)
                 x = cost_func.forward(x, dummy)
@@ -144,6 +142,7 @@ class PVDBOW(nn.Module):
                 optimizer.step()
                 if verbose:
                     _print_progress(i_epoch, i_batch, n_batches)
+                i_batch += 1
 
             # end of epoch
             loss = torch.mean(torch.FloatTensor(loss))
