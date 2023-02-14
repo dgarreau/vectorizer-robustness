@@ -8,10 +8,8 @@ kudos to https://github.com/inejc/paragraph-vectors
 
 """
 
-# TODO Abstract PVDBOW / PDVM in one class and derive it
 # TODO (carefuly) implement 1/T
 
-import pdb
 import torch
 import torch.nn as nn
 import time
@@ -32,14 +30,6 @@ from .data import ContexifiedDataSet
 from .loss import LogSoftmax
 from .inference import compute_embedding
 
-_DM_WEIGHTS_NAME = "DM_weights_N.{:d}_D.{:d}_d.{:d}_nu.{:d}_concat.{:d}.pth.tar"
-_DM_VOCAB_NAME = "DM_vocab_N.{:d}_D.{:d}_d.{:d}_nu.{:d}_concat.{:d}.pth.tar"
-_DM_PARAM_NAME = "DM_param_N.{:d}_D.{:d}_d.{:d}_nu.{:d}_concat.{:d}.pth.tar"
-
-_DBOW_WEIGHTS_NAME = "DBOW_weights_N.{:d}_D.{:d}_d.{:d}_nu.{:d}.pth.tar"
-_DBOW_VOCAB_NAME = "DBOW_vocab_N.{:d}_D.{:d}_d.{:d}_nu.{:d}.pth.tar"
-_DBOW_PARAM_NAME = "DBOW_param_N.{:d}_D.{:d}_d.{:d}_nu.{:d}.pth.tar"
-
 
 def _print_progress(epoch_i, batch_i, num_batches):
     progress = round((batch_i + 1) / num_batches * 100)
@@ -55,8 +45,7 @@ class ParagraphVectorVariant(Enum):
 
 
 class ParagraphVector(nn.Module):
-    def __init__(self, dim=50, context_size=5,
-                 variant=ParagraphVectorVariant.PVDBOW):
+    def __init__(self, dim=50, context_size=5, variant=ParagraphVectorVariant.PVDBOW):
         super(ParagraphVector, self).__init__()
         self.dim = dim
         self.context_size = context_size
@@ -105,10 +94,13 @@ class ParagraphVector(nn.Module):
 
         num_noise_words = 0
         raw_data, vocabulary = dataset
-        ctx_dataset = ContexifiedDataSet(raw_data,
-                                         self.context_size,
-                                         )
-        dataloader = DataLoader(ctx_dataset, self.batch_size, num_workers=self.num_workers)
+        ctx_dataset = ContexifiedDataSet(
+            raw_data,
+            self.context_size,
+        )
+        dataloader = DataLoader(
+            ctx_dataset, self.batch_size, num_workers=self.num_workers
+        )
         n_batches = len(dataloader)
 
         self.vocabulary = vocabulary
@@ -195,7 +187,7 @@ class ParagraphVector(nn.Module):
         for i_epoch in range(n_epochs):
             epoch_start = time.time()
             loss = []
-            i_batch = 0 # enumerate is bad for multiprocessing?
+            i_batch = 0  # enumerate is bad for multiprocessing?
             for batch in dataloader:
                 context_ids, doc_ids, target_ids = batch
                 x = self.forward(context_ids, doc_ids)
