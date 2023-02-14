@@ -67,6 +67,20 @@ def mkdir(mypath):
             raise
 
 
+def build_vocab(dataset, tokenizer, n_doc):
+    counter = Counter()
+    cur_n = 0
+    for _, line in dataset:
+        if cur_n < n_doc:
+            counter.update(tokenizer(line))
+        else:
+            break
+        cur_n += 1
+    vocabulary = vocab(counter, min_freq=1, specials=('<unk>'))
+    vocabulary.set_default_index(-1)
+    return vocabulary
+
+
 def load_dataset(data, implem, verbose=False, split_ratio=None):
     # taking only 1000 doc
     if not split_ratio:
@@ -84,35 +98,19 @@ def load_dataset(data, implem, verbose=False, split_ratio=None):
 
         if implem == "local":
             # FIXME: randomize and include train also
-            dataset = IMDB(DATA_DIR, split="train")
-            tokenizer = _tokenize_str#get_tokenizer('basic_english')
+            train_ds, _ = IMDB(DATA_DIR, split=("train", "test"))
+            tokenizer = get_tokenizer('basic_english')
 
             n_train = int(split_ratio * n_docs)
-            counter = Counter()
-            cur_n = 0
-            for (label, line) in dataset:
-                if cur_n < n_train:
-                    counter.update(tokenizer(line))
-                else:
-                    break
-                cur_n += 1
-            vocabulary = vocab(counter, min_freq=1, specials=('<unk>'))
-            vocabulary.set_default_index(-1)
+            vocabulary = build_vocab(train_ds, tokenizer, n_train)
 
             # HACK: transform into list the original dataset. BAD if large.
-            data = list(map(
+            raw_data = list(map(
                 lambda e: torch.tensor([vocabulary[token]
                                         for token in tokenizer(e[1])]),
-                list(dataset)[:n_train]))
+                list(train_ds)[:n_train]))
 
-            dataset = {
-                "dataset": list(dataset)[:n_train], #HACK: bad for large dataset!
-                "data": data,
-                "vocab": vocabulary,
-                "counter": counter,
-                "tokenizer": tokenizer,
-            }
-
+            dataset = (raw_data, vocabulary)
 
         elif implem == "gensim":
 

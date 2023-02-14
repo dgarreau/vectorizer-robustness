@@ -82,15 +82,16 @@ class PVDBOW(nn.Module):
         self.num_workers = num_workers
 
         num_noise_words = 0
-        ctx_dataset = ContexifiedDataSet(dataset["data"],
+        raw_data, vocabulary = dataset
+        ctx_dataset = ContexifiedDataSet(raw_data,
                                          self.context_size,
                                          )
         dataloader = DataLoader(ctx_dataset, self.batch_size, num_workers=self.num_workers)
         n_batches = len(dataloader)
 
-        self.vocabulary = dataset["vocab"]
+        self.vocabulary = vocabulary
 
-        self.n_docs = len(dataset["dataset"])
+        self.n_docs = len(raw_data)
         self.n_words = len(self.vocabulary)
 
         # parameters of the model
