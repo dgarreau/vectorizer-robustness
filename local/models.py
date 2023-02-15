@@ -103,6 +103,9 @@ class ParagraphVector(nn.Module):
         # times R
         return torch.mm(h, self._R_matrix)
 
+    def extra_repr(self):
+        return f"dim={self.dim}, context_size={self.context_size}, n_words={self.n_words}, n_docs={self.n_docs},"
+
     def get_P_matrix(self):
         """
         Get P matrix as numpy array.
