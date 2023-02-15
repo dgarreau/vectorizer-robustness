@@ -33,6 +33,7 @@ import pickle
 from os.path import join
 
 from local.models import ParagraphVector, ParagraphVectorVariant
+from local.trainer import Trainer
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from utils import get_vectorizer_name
@@ -147,7 +148,8 @@ if __name__ == '__main__':
             vectorizer = ParagraphVector(dim=dim, context_size=winsize, variant=ParagraphVectorVariant.PVDBOW)
 
         # training the model
-        vectorizer.train(dataset, lr=lr, n_epochs=n_epochs, verbose=True)
+        trainer = Trainer(lr=lr, n_epochs=n_epochs, verbose=True)
+        trainer.fit(vectorizer, dataset)
 
         # saving the model
         vectorizer.save(vectorizer_name, verbose=True)
