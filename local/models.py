@@ -20,15 +20,62 @@ from os.path import join
 from .inference import compute_embedding
 from . import ParagraphVectorVariant
 
-
-
+#FIXME I don't like the fact that __init__ depends on the number of documents.
 class ParagraphVector(nn.Module):
-    def __init__(self, vocabulary, context_size=5, dim=50, variant=ParagraphVectorVariant.PVDBOW):
+    def __init__(self, vocabulary, n_docs, context_size=5, dim=50, variant=ParagraphVectorVariant.PVDBOW):
         super(ParagraphVector, self).__init__()
         self.vocabulary = vocabulary
         self.dim = dim
         self.context_size = context_size
+        self.n_words = len(self.vocabulary)
+        self.n_docs = n_docs
         self.variant = variant
+
+        # Projection matrix P
+        if self.variant == ParagraphVectorVariant.PVDMconcat:
+            # size 2nuD x d in our notation
+            self._P_matrix = nn.Parameter(
+                torch.sqrt(
+                    torch.tensor([2.0])
+                    / torch.tensor([2 * self.context_size * self.n_words + self.dim])
+                )
+                * torch.randn(2 * self.context_size * self.n_words, self.dim),
+                requires_grad=True,
+            )
+            self.one_hot_buffer = nn.Parameter(
+                torch.eye(self.n_words), requires_grad=False
+            )
+        elif self.variant == ParagraphVectorVariant.PVDMmean:
+            # size d x D in our notation
+            self._P_matrix = nn.Parameter(
+                torch.sqrt(
+                    torch.tensor([2.0]) / torch.tensor([self.n_words + self.dim])
+                )
+                * torch.randn(self.n_words, self.dim),
+                requires_grad=True,
+            )
+        elif self.variant == ParagraphVectorVariant.PVDBOW:
+            self._P_matrix = nn.Parameter(torch.tensor([])) #to be able to save it
+        else:
+            raise NotImplementedError
+
+        # Matrix R
+        # final layer
+        # R in our notation, size D x d
+        self._R_matrix = nn.Parameter(
+            torch.sqrt(torch.tensor([2.0]) / torch.tensor([self.n_words + self.dim]))
+            * torch.randn(self.dim, self.n_words),
+            requires_grad=True,
+        )
+
+        # embedding of the documents, Gaussian initialization
+        # Q in our notation, size d x N
+        self._Q_matrix = nn.Parameter(
+            torch.sqrt(torch.tensor([2.0]) / torch.tensor([self.n_docs + self.dim]))
+            * torch.randn(self.n_docs, self.dim),
+            requires_grad=True,
+        )
+
 
     def forward(self, context_ids, doc_ids):
         if self.variant == ParagraphVectorVariant.PVDMconcat:

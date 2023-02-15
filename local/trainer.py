@@ -44,54 +44,6 @@ class Trainer:
         )
         n_batches = len(dataloader)
 
-        self.n_docs = len(raw_data)
-        self.n_words = len(model.vocabulary)
-
-        # Projection matrix P
-        if model.variant == ParagraphVectorVariant.PVDMconcat:
-            # size 2nuD x d in our notation
-            model._P_matrix = nn.Parameter(
-                torch.sqrt(
-                    torch.tensor([2.0])
-                    / torch.tensor([2 * model.context_size * self.n_words + model.dim])
-                )
-                * torch.randn(2 * model.context_size * self.n_words, model.dim),
-                requires_grad=True,
-            )
-            model.one_hot_buffer = nn.Parameter(
-                torch.eye(self.n_words), requires_grad=False
-            )
-        elif model.variant == ParagraphVectorVariant.PVDMmean:
-            # size d x D in our notation
-            model._P_matrix = nn.Parameter(
-                torch.sqrt(
-                    torch.tensor([2.0]) / torch.tensor([self.n_words + model.dim])
-                )
-                * torch.randn(self.n_words, model.dim),
-                requires_grad=True,
-            )
-        elif model.variant == ParagraphVectorVariant.PVDBOW:
-            model._P_matrix = nn.Parameter(torch.tensor([])) #to be able to save it
-        else:
-            raise NotImplementedError
-
-        # Matrix R
-        # final layer
-        # R in our notation, size D x d
-        model._R_matrix = nn.Parameter(
-            torch.sqrt(torch.tensor([2.0]) / torch.tensor([self.n_words + model.dim]))
-            * torch.randn(model.dim, self.n_words),
-            requires_grad=True,
-        )
-
-        # embedding of the documents, Gaussian initialization
-        # Q in our notation, size d x N
-        model._Q_matrix = nn.Parameter(
-            torch.sqrt(torch.tensor([2.0]) / torch.tensor([self.n_docs + model.dim]))
-            * torch.randn(self.n_docs, model.dim),
-            requires_grad=True,
-        )
-
         if torch.cuda.is_available():
             model.cuda()
             if self.verbose:
@@ -107,8 +59,8 @@ class Trainer:
                 print("PVDBOW training starts:")
             else:
                 raise NotImplementedError
-            print("N = {:d}".format(self.n_docs))
-            print("D = {:d}".format(self.n_words))
+            print("N = {:d}".format(model.n_docs))
+            print("D = {:d}".format(model.n_words))
             print("d = {:d}".format(model.dim))
             print("nu = {:d}".format(model.context_size))
             print("lr = {:.4f}".format(self.lr))
