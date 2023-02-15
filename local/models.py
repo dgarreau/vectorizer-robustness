@@ -39,15 +39,11 @@ def _print_progress(epoch_i, batch_i, num_batches):
 
 
 class ParagraphVector(nn.Module):
-    def __init__(self, dim=50, context_size=5, variant=ParagraphVectorVariant.PVDBOW, device=None):
+    def __init__(self, dim=50, context_size=5, variant=ParagraphVectorVariant.PVDBOW):
         super(ParagraphVector, self).__init__()
         self.dim = dim
         self.context_size = context_size
         self.variant = variant
-        if device:
-            self.device = device
-        else:
-            self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     def forward(self, context_ids, doc_ids):
         if self.variant == ParagraphVectorVariant.PVDMconcat:
@@ -116,10 +112,10 @@ class ParagraphVector(nn.Module):
                 )
                 * torch.randn(2 * self.context_size * self.n_words, self.dim),
                 requires_grad=True,
-            ).to(self.device)
+            )
             self.one_hot_buffer = nn.Parameter(
                 torch.eye(self.n_words), requires_grad=False
-            ).to(self.device)
+            )
         elif self.variant == ParagraphVectorVariant.PVDMmean:
             # size d x D in our notation
             self._P_matrix = nn.Parameter(
@@ -128,9 +124,9 @@ class ParagraphVector(nn.Module):
                 )
                 * torch.randn(self.n_words, self.dim),
                 requires_grad=True,
-            ).to(self.device)
+            )
         elif self.variant == ParagraphVectorVariant.PVDBOW:
-            self._P_matrix = nn.Parameter(torch.tensor([])).to(self.device) #to be able to save it
+            self._P_matrix = nn.Parameter(torch.tensor([])) #to be able to save it
         else:
             raise NotImplementedError
 
@@ -141,7 +137,7 @@ class ParagraphVector(nn.Module):
             torch.sqrt(torch.tensor([2.0]) / torch.tensor([self.n_words + self.dim]))
             * torch.randn(self.dim, self.n_words),
             requires_grad=True,
-        ).to(self.device)
+        )
 
         # embedding of the documents, Gaussian initialization
         # Q in our notation, size d x N
@@ -149,7 +145,7 @@ class ParagraphVector(nn.Module):
             torch.sqrt(torch.tensor([2.0]) / torch.tensor([self.n_docs + self.dim]))
             * torch.randn(self.n_docs, self.dim),
             requires_grad=True,
-        ).to(self.device)
+        )
 
         if torch.cuda.is_available():
             self.cuda()
