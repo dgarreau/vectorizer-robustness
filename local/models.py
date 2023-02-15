@@ -107,22 +107,13 @@ class ParagraphVector(nn.Module):
         return f"dim={self.dim}, context_size={self.context_size}, n_words={self.n_words}, n_docs={self.n_docs},"
 
     def get_P_matrix(self):
-        """
-        Get P matrix as numpy array.
-        """
-        return self._P_matrix.detach().T#.cpu().detach().numpy().T
+        return self._P_matrix.detach().T
 
     def get_Q_matrix(self):
-        """
-        Get Q matrix as numpy array.
-        """
-        return self._Q_matrix.detach().T#.cpu().detach().numpy().T
+        return self._Q_matrix.detach().T
 
     def get_R_matrix(self):
-        """
-        Get R matrix as numpy array.
-        """
-        return self._R_matrix.detach().T#.cpu().detach().numpy().T
+        return self._R_matrix.detach().T
 
     def load(self, name, verbose=False):
         """
@@ -208,7 +199,7 @@ class ParagraphVector(nn.Module):
         P_array = self.get_P_matrix()
         R_array = self.get_R_matrix()
         stoi = self.vocabulary.get_stoi()
-        tokenized_doc = document#np.array([stoi[w] for w in document], dtype=int)
+        tokenized_doc = torch.tensor([stoi[w] for w in document], dtype=torch.long)
         q_vec, traj_store, obj_store = compute_embedding(
             tokenized_doc,
             R_array,
