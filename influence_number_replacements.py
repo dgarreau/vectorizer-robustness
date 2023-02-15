@@ -32,12 +32,15 @@ np.random.seed(seed)
 # parameters of the experiment
 data = "IMDB"
 implem = "local"
-model = "PVDBOW"
+model = "PVDMmean"
 
 # get unique identifier and create relevant folder
 vectorizer_name = get_vectorizer_name(data, implem, model)
 res_dir = join(RESULTS_DIR, "influence_number_replacements", vectorizer_name)
 mkdir(res_dir)
+
+# load dataset
+dataset = load_dataset(data, implem, verbose=True)
 
 # load the vectorizer
 f_name = join(MODELS_DIR, vectorizer_name)
@@ -47,16 +50,15 @@ elif implem == "scikit":
     with open(f_name, "rb") as f:
         vectorizer = pickle.load(f)
 elif implem == "local":
+    dataset, vocabulary = dataset
     if model == "PVDMmean":
-        vectorizer = ParagraphVector(variant=ParagraphVectorVariant.PVDMmean)
+        vectorizer = ParagraphVector(vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDMmean)
     elif model == "PVDMconcat":
-        vectorizer = ParagraphVector(variant=ParagraphVectorVariant.PVDMconcat)
+        vectorizer = ParagraphVector(vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDMconcat)
     elif model == "PVDBOW":
-        vectorizer = ParagraphVector(variant=ParagraphVectorVariant.PVDBOW)
+        vectorizer = ParagraphVector(vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDBOW)
     vectorizer.load(vectorizer_name)
 
-# load dataset
-dataset = load_dataset(data, implem, verbose=True)
 
 # get relevant parameters
 if implem == "gensim":
@@ -92,7 +94,7 @@ for ex in examples:
         ex_orig_list = ex_orig.split(" ")
     elif implem == "local":
         ex_orig = dataset[ex]
-        ex_orig_list = ex_orig.copy()
+        ex_orig_list = list(map(lambda u: vocab[u], ex_orig))
     T = len(ex_orig_list)
 
     # original embedding

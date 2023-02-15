@@ -55,7 +55,7 @@ class ParagraphVector(nn.Module):
                 requires_grad=True,
             )
         elif self.variant == ParagraphVectorVariant.PVDBOW:
-            self._P_matrix = nn.Parameter(torch.tensor([])) #to be able to save it
+            self._P_matrix = nn.Parameter(torch.zeros((self.n_words, self.dim))) #to be able to save it
         else:
             raise NotImplementedError
 
@@ -107,13 +107,13 @@ class ParagraphVector(nn.Module):
         return f"dim={self.dim}, context_size={self.context_size}, n_words={self.n_words}, n_docs={self.n_docs},"
 
     def get_P_matrix(self):
-        return self._P_matrix.detach().T
+        return self._P_matrix.T.detach()
 
     def get_Q_matrix(self):
-        return self._Q_matrix.detach().T
+        return self._Q_matrix.T.detach()
 
     def get_R_matrix(self):
-        return self._R_matrix.detach().T
+        return self._R_matrix.T.detach()
 
     def load(self, name, verbose=False):
         """

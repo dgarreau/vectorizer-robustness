@@ -216,15 +216,15 @@ def compute_gradient(
     if model == ParagraphVectorVariant.PVDBOW:
         if mode == "true":
             grad = (T - 2 * winsize) * torch.matmul(
-                R_matrix.T, softmax(torch.matmul(R_matrix, q_vec))
+                R_matrix.T, softmax(torch.matmul(R_matrix, q_vec), dim=0)
             ) - torch.sum(R_matrix[example_orig[winsize : T - winsize], :], 0)
 
         elif mode == "linear":
             grad_orig = (T - 2 * winsize) * torch.matmul(
-                R_matrix.T, softmax(torch.matmul(R_matrix, q_vec))
+                R_matrix.T, softmax(torch.matmul(R_matrix, q_vec), dim=0)
             ) - torch.sum(R_matrix[example_orig[winsize : T - winsize], :], 0)
             grad_new = (T - 2 * winsize) * torch.matmul(
-                R_matrix.T, softmax(torch.matmul(R_matrix, q_vec))
+                R_matrix.T, softmax(torch.matmul(R_matrix, q_vec), dim=0)
             ) - torch.sum(R_matrix[example_new[winsize : T - winsize], :], 0)
             grad = lbda * grad_new + (1 - lbda) * grad_orig
 

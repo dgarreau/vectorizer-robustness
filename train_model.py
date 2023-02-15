@@ -53,7 +53,7 @@ if __name__ == '__main__':
     # parameters of the experiment
     data = "IMDB"
     implem = "local"
-    model = "PVDBOW"
+    model = "PVDMmean"
 
     # unique identifier
     vectorizer_name = get_vectorizer_name(data, implem, model)
@@ -135,7 +135,7 @@ if __name__ == '__main__':
 
         dim = 50
         winsize = 5
-        n_epochs = 2#100
+        n_epochs = 100
 
         raw_data, vocabulary = dataset
         if model == "PVDMmean":
