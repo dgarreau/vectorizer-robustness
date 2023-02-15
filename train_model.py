@@ -137,15 +137,16 @@ if __name__ == '__main__':
         winsize = 5
         n_epochs = 2#100
 
+        raw_data, vocabulary = dataset
         if model == "PVDMmean":
             lr = 0.001
-            vectorizer = ParagraphVector(dim=dim, context_size=winsize, variant=ParagraphVectorVariant.PVDMmean)
+            vectorizer = ParagraphVector(vocabulary, dim=dim, context_size=winsize, variant=ParagraphVectorVariant.PVDMmean)
         elif model == "PVDMconcat":
             lr = 0.0005
-            vectorizer = ParagraphVector(dim=dim, context_size=winsize, variant=ParagraphVectorVariant.PVDMconcat)
+            vectorizer = ParagraphVector(vocabulary, dim=dim, context_size=winsize, variant=ParagraphVectorVariant.PVDMconcat)
         elif model == "PVDBOW":
             lr = 0.001
-            vectorizer = ParagraphVector(dim=dim, context_size=winsize, variant=ParagraphVectorVariant.PVDBOW)
+            vectorizer = ParagraphVector(vocabulary, dim=dim, context_size=winsize, variant=ParagraphVectorVariant.PVDBOW)
 
         # training the model
         trainer = Trainer(lr=lr, n_epochs=n_epochs, verbose=True)

@@ -23,8 +23,9 @@ from . import ParagraphVectorVariant
 
 
 class ParagraphVector(nn.Module):
-    def __init__(self, dim=50, context_size=5, variant=ParagraphVectorVariant.PVDBOW):
+    def __init__(self, vocabulary, context_size=5, dim=50, variant=ParagraphVectorVariant.PVDBOW):
         super(ParagraphVector, self).__init__()
+        self.vocabulary = vocabulary
         self.dim = dim
         self.context_size = context_size
         self.variant = variant
