@@ -214,19 +214,19 @@ class ParagraphVector(nn.Module):
         """
         Get P matrix as numpy array.
         """
-        return self._P_matrix.cpu().detach().numpy().T
+        return self._P_matrix.detach().T#.cpu().detach().numpy().T
 
     def get_Q_matrix(self):
         """
         Get Q matrix as numpy array.
         """
-        return self._Q_matrix.cpu().detach().numpy().T
+        return self._Q_matrix.detach().T#.cpu().detach().numpy().T
 
     def get_R_matrix(self):
         """
         Get R matrix as numpy array.
         """
-        return self._R_matrix.cpu().detach().numpy().T
+        return self._R_matrix.detach().T#.cpu().detach().numpy().T
 
     def load(self, name, verbose=False):
         """

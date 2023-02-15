@@ -13,7 +13,7 @@ import time
 import pickle
 import numpy as np
 
-from local.models import PVDM, PVDBOW
+from local.models import ParagraphVector
 
 from gensim.models.doc2vec import Doc2Vec
 
@@ -48,11 +48,11 @@ elif implem == "scikit":
         vectorizer = pickle.load(f)
 elif implem == "local":
     if model == "PVDMmean":
-        vectorizer = PVDM(concat=False)
+        vectorizer = ParagraphVector(variant=ParagraphVectorVariant.PVDMmean)
     elif model == "PVDMconcat":
-        vectorizer = PVDM(concat=True)
+        vectorizer = ParagraphVector(variant=ParagraphVectorVariant.PVDMconcat)
     elif model == "PVDBOW":
-        PVDBOW()
+        vectorizer = ParagraphVector(variant=ParagraphVectorVariant.PVDBOW)
     vectorizer.load(vectorizer_name)
 
 # load dataset
@@ -74,7 +74,7 @@ elif implem == "local":
     winsize = vectorizer.context_size
     dim = vectorizer.dim
     D = vectorizer.n_words
-    vocab = vectorizer.vocabulary.itos
+    vocab = vectorizer.vocabulary.get_itos()
 
 # main loop
 n_rep = 5
@@ -90,8 +90,8 @@ for ex in examples:
         ex_orig = dataset[ex]
         ex_orig_list = ex_orig.split(" ")
     elif implem == "local":
-        ex_orig = dataset[ex]
-        ex_orig_list = ex_orig.text.copy()
+        ex_orig = dataset[0][ex]
+        ex_orig_list = ex_orig.detach() #TODO do i need this detach?
 
     # range of the experiment
     t_max = len(ex_orig_list)
@@ -105,7 +105,7 @@ for ex in examples:
     t_start = time.time()
     for current_length in range(2 * winsize + 1, t_max + 1):
         print("{} / {}".format(current_length - 2 * winsize, n_length))
-        ex_current_list = ex_orig_list[:current_length].copy()
+        ex_current_list = ex_orig_list[:current_length]#.copy() do i need to cpy?
         ex_current = " ".join(ex_current_list)
 
         if implem == "gensim":

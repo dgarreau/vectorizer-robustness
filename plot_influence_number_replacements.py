@@ -31,7 +31,7 @@ examples = [3, 7, 10]
 
 # parameters of the experiment
 data = "IMDB"
-implem = "gensim"
+implem = "local"
 model = "PVDBOW"
 
 # get unique identifier and create relevant folders
@@ -52,7 +52,7 @@ for ex in examples:
     with open(file_name, "rb") as f:
         res_dict = pickle.load(f)
 
-    q_orig = res_dict["q_orig"]
+    q_orig = np.array(res_dict["q_orig"])
     T = len(res_dict["example_orig"])
     n_simu = res_dict["q_new_store"].shape[1]
 
@@ -60,7 +60,7 @@ for ex in examples:
     dist_store = np.zeros((T, n_simu))
     for i in range(T):
         for i_simu in range(n_simu):
-            q_new = res_dict["q_new_store"][i, i_simu]
+            q_new = np.array(res_dict["q_new_store"][i, i_simu])
             dist_store[i, i_simu] = np.linalg.norm(q_new - q_orig)
 
     mean_dist = np.mean(dist_store, axis=1)
