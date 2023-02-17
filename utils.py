@@ -67,15 +67,10 @@ def mkdir(mypath):
             raise
 
 
-def build_vocab(dataset, tokenizer, n_doc):
+def build_vocab(dataset, tokenizer):
     counter = Counter()
-    cur_n = 0
     for _, line in dataset:
-        if cur_n < n_doc:
-            counter.update(tokenizer(line))
-        else:
-            break
-        cur_n += 1
+        counter.update(tokenizer(line))
     # FIXME should deal with unknown with special="<unk>"
     # Not working right now with torchtext==0.10.0
     vocabulary = vocab(counter, min_freq=1)
@@ -99,22 +94,24 @@ def load_dataset(data, implem, verbose=False, split_ratio=None):
             download_IMDB_dataset()
 
         if implem == "local":
-            train_ds = IMDB(DATA_DIR, split="train")
-            tokenizer = _tokenize_str
-
+            _, train_ds = IMDB(DATA_DIR) # WTF torchtext?????
             n_train = int(split_ratio * n_docs)
-            vocabulary = build_vocab(train_ds, tokenizer, n_train)
+            train_raw = list(train_ds)
+            random.seed(4) # WTF BIS torchtext!!!!!
+            random.shuffle(train_raw)
+            train_raw = train_raw[:n_train]
 
-            # HACK: HUGE hack (to make it work with torchtext==0.10.0) -> reload train_ds
-            train_ds = IMDB(DATA_DIR, split="train")
+            tokenizer = _tokenize_str
+            vocabulary = build_vocab(train_raw, tokenizer)
 
             # HACK: transform into list the original dataset. BAD if large.
             raw_data = list(map(
                 lambda e: torch.tensor([vocabulary[token]
                                         for token in tokenizer(e[1])]),
-                list(train_ds)[:n_train]))
+                train_raw))
 
-            dataset = (raw_data, vocabulary)
+            #labels = list(map(lambda e: e[0], train_raw))
+            dataset = (raw_data, vocabulary)#, labels)
 
         elif implem == "gensim":
 

@@ -15,7 +15,7 @@ class LogSoftmax(nn.Module):
         super(LogSoftmax, self).__init__()
         self._log_sigmoid = nn.LogSoftmax(dim=1)
 
-    def forward(self, scores, target_ids):
+    def forward(self, scores, target_ids, lengths):
 
         batch_size, _ = scores.shape
 
@@ -24,6 +24,6 @@ class LogSoftmax(nn.Module):
         # import pdb; pdb.set_trace()
         #probas = aux[torch.arange(batch_size), torch.transpose(target_ids, 0, 1)]
         #HACK: remove transpose
-        probas = aux[torch.arange(batch_size), target_ids]
+        logit = aux[torch.arange(batch_size), target_ids]
 
-        return torch.sum(probas)
+        return torch.sum(logit/lengths)
