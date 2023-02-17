@@ -41,8 +41,8 @@ class ContexifiedDataSet(Dataset):
         doc_id = torch.searchsorted(self._cumulative_number_examples, idx+1)
         doc_t = self.data[doc_id]
         ctx_idx = idx - self._cumulative_number_examples[doc_id-1] if doc_id > 0 else idx
-        batch = (self._ctx_at(doc_t, ctx_idx), doc_id, doc_t[ctx_idx+self.ctx_size])
-        return batch
+        elem = (self._ctx_at(doc_t, ctx_idx), doc_id, doc_t[ctx_idx+self.ctx_size])
+        return elem
 
 
     def _ctx_at(self, doc, ctx_id):
