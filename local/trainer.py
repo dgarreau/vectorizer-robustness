@@ -48,6 +48,7 @@ class Trainer:
             if self.verbose:
                 print("using cuda")
                 print()
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         if self.verbose:
             if model.variant == ParagraphVectorVariant.PVDMconcat:
@@ -81,7 +82,7 @@ class Trainer:
             for batch in dataloader:
                 context_ids, doc_ids, target_ids = batch
                 x = model(context_ids, doc_ids)
-                lengths = torch.tensor([len(raw_data[idx]) for idx in doc_ids], requires_grad=False)
+                lengths = torch.tensor([len(raw_data[idx]) for idx in doc_ids], requires_grad=False).to(device)              
                 x = cost_func(x, target_ids, lengths)
                 loss.append(x.item())
                 model.zero_grad()

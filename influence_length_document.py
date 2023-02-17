@@ -32,7 +32,7 @@ np.random.seed(seed)
 # parameters of the experiment
 data = "IMDB"
 implem = "local"
-model = "PVDMmean"
+model = "PVDBOW"
 
 # get unique identifier and create relevant folder
 vectorizer_name = get_vectorizer_name(data, implem, model)

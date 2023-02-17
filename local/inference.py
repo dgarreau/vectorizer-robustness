@@ -77,7 +77,7 @@ def global_softmax(q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW
     """
     T = len(example)
     if model == ParagraphVectorVariant.PVDBOW:
-        aux_h = torch.tile(torch.dot(R_matrix, q_vec), (T - 2 * winsize, 1)).T
+        aux_h = torch.tile(torch.matmul(R_matrix, q_vec), (T - 2 * winsize, 1)).T
         sm = softmax(aux_h, dim=0)
     elif model == ParagraphVectorVariant.PVDMmean or model == ParagraphVectorVariant.PVDMconcat:
         gcv = global_context_vectors(example, P_matrix, model=model, winsize=winsize)
@@ -288,7 +288,7 @@ def compute_embedding(
         if model == ParagraphVectorVariant.PVDMmean or model == ParagraphVectorVariant.PVDMconcat:
             gamma = 0.01
         else:
-            gamma = 0.005
+            gamma = 0.001
     if n_steps is None:
         if model == ParagraphVectorVariant.PVDMmean or model == ParagraphVectorVariant.PVDMconcat:
             n_steps = 100

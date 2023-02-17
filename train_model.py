@@ -53,13 +53,13 @@ if __name__ == '__main__':
     # parameters of the experiment
     data = "IMDB"
     implem = "local"
-    model = "PVDMmean"
+    model = "PVDBOW"
 
     # unique identifier
     vectorizer_name = get_vectorizer_name(data, implem, model)
 
     # load data
-    dataset = load_dataset(data, implem, split_ratio = 0.002, verbose=True)
+    dataset = load_dataset(data, implem, split_ratio = 0.02, verbose=True)
 
     # instanciate the model
     winsize = 5
