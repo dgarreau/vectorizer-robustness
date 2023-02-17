@@ -81,7 +81,8 @@ class Trainer:
             for batch in dataloader:
                 context_ids, doc_ids, target_ids = batch
                 x = model(context_ids, doc_ids)
-                x = cost_func(x, target_ids)
+                lengths = torch.tensor([len(raw_data[idx]) for idx in doc_ids], requires_grad=False)
+                x = cost_func(x, target_ids, lengths)
                 loss.append(x.item())
                 model.zero_grad()
                 x.backward()
