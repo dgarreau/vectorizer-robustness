@@ -32,7 +32,7 @@ examples = [0]
 # parameters of the experiment
 data = "IMDB"
 implem = "local"
-model = "PVDMconcat"
+model = "PVDBOW"
 
 # get unique identifier and create relevant folders
 vectorizer_name = get_vectorizer_name(data, implem, model)
