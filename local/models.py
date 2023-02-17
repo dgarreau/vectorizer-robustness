@@ -211,4 +211,4 @@ class ParagraphVector(nn.Module):
             n_steps=n_steps,
             gamma=gamma,
         )
-        return q_vec
+        return q_vec#, traj_store, obj_store

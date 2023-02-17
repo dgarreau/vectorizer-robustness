@@ -79,9 +79,9 @@ elif implem == "local":
     vocab = vectorizer.vocabulary.get_itos()
 
 # main loop
-n_rep = 5
-n_simu = 50
-examples = [0, 1, 3, 7, 10]
+n_rep = 2
+n_simu = 5
+examples = [0]
 for ex in examples:
     print("looking at example {}".format(ex))
 
@@ -96,6 +96,7 @@ for ex in examples:
         ex_orig = dataset[ex]
         ex_orig_list = list(map(lambda u: vocab[u], ex_orig))
     T = len(ex_orig_list)
+
 
     # original embedding
     if implem == "gensim":

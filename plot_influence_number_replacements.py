@@ -27,12 +27,12 @@ large_fs = 35
 lw = 3
 
 # examples to plot
-examples = [3, 7, 10]
+examples = [0]
 
 # parameters of the experiment
 data = "IMDB"
 implem = "local"
-model = "PVDBOW"
+model = "PVDMmean"
 
 # get unique identifier and create relevant folders
 vectorizer_name = get_vectorizer_name(data, implem, model)
