@@ -13,7 +13,7 @@ import time
 import pickle
 import numpy as np
 
-from local.models import PVDM, PVDBOW
+from local.models import ParagraphVectorVariant, ParagraphVector
 
 from gensim.models.doc2vec import Doc2Vec
 
@@ -31,13 +31,16 @@ np.random.seed(seed)
 
 # parameters of the experiment
 data = "IMDB"
-implem = "gensim"
-model = "PVDBOW"
+implem = "local"
+model = "PVDMmean"
 
 # get unique identifier and create relevant folder
 vectorizer_name = get_vectorizer_name(data, implem, model)
 res_dir = join(RESULTS_DIR, "influence_number_replacements", vectorizer_name)
 mkdir(res_dir)
+
+# load dataset
+dataset = load_dataset(data, implem, verbose=True)
 
 # load the vectorizer
 f_name = join(MODELS_DIR, vectorizer_name)
@@ -47,16 +50,15 @@ elif implem == "scikit":
     with open(f_name, "rb") as f:
         vectorizer = pickle.load(f)
 elif implem == "local":
+    dataset, vocabulary = dataset
     if model == "PVDMmean":
-        vectorizer = PVDM(concat=False)
+        vectorizer = ParagraphVector(vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDMmean)
     elif model == "PVDMconcat":
-        vectorizer = PVDM(concat=True)
+        vectorizer = ParagraphVector(vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDMconcat)
     elif model == "PVDBOW":
-        PVDBOW()
+        vectorizer = ParagraphVector(vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDBOW)
     vectorizer.load(vectorizer_name)
 
-# load dataset
-dataset = load_dataset(data, implem, verbose=True)
 
 # get relevant parameters
 if implem == "gensim":
@@ -71,15 +73,15 @@ elif implem == "scikit":
     D = len(vocab)
     dim = D
 elif implem == "local":
-    winsize = vectorizer.get_context_size()
-    dim = vectorizer.get_dim()
-    D = vectorizer.get_n_words()
-    vocab = vectorizer.vocabulary.itos
+    winsize = vectorizer.context_size
+    dim = vectorizer.dim
+    D = vectorizer.n_words
+    vocab = vectorizer.vocabulary.get_itos()
 
 # main loop
-n_rep = 5
-n_simu = 50
-examples = [0, 1, 3, 7, 10]
+n_rep = 2
+n_simu = 5
+examples = [0]
 for ex in examples:
     print("looking at example {}".format(ex))
 
@@ -92,8 +94,9 @@ for ex in examples:
         ex_orig_list = ex_orig.split(" ")
     elif implem == "local":
         ex_orig = dataset[ex]
-        ex_orig_list = ex_orig.text.copy()
+        ex_orig_list = list(map(lambda u: vocab[u], ex_orig))
     T = len(ex_orig_list)
+
 
     # original embedding
     if implem == "gensim":

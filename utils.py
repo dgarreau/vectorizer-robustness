@@ -18,6 +18,7 @@ import gensim
 import sys
 import smart_open
 import pandas as pd
+from collections import Counter
 
 from os.path import join
 from os import makedirs, path
@@ -25,7 +26,13 @@ import configparser
 
 from errno import EEXIST
 
-from torchtext.legacy.data import Field, TabularDataset
+from torch.utils.data import Subset
+
+# from torchtext.legacy.data import Field, TabularDataset # TODO: to remove after newimplem
+import torch
+from torchtext.datasets import IMDB
+from torchtext.data.utils import get_tokenizer
+from torchtext.vocab import vocab
 
 # set the seed
 seed = 0
@@ -60,7 +67,26 @@ def mkdir(mypath):
             raise
 
 
-def load_dataset(data, implem, verbose=False, split_ratio=0.1):
+def build_vocab(dataset, tokenizer, n_doc):
+    counter = Counter()
+    cur_n = 0
+    for _, line in dataset:
+        if cur_n < n_doc:
+            counter.update(tokenizer(line))
+        else:
+            break
+        cur_n += 1
+    # FIXME should deal with unknown with special="<unk>"
+    # Not working right now with torchtext==0.10.0
+    vocabulary = vocab(counter, min_freq=1)
+    vocabulary.set_default_index(-1)
+    return vocabulary
+
+
+def load_dataset(data, implem, verbose=False, split_ratio=None):
+    # taking only 1000 doc
+    if not split_ratio:
+        split_ratio = 0.02
 
     if verbose:
         print("loading data...")
@@ -73,27 +99,23 @@ def load_dataset(data, implem, verbose=False, split_ratio=0.1):
             download_IMDB_dataset()
 
         if implem == "local":
+            train_ds = IMDB(DATA_DIR, split="train")
+            tokenizer = _tokenize_str
 
-            # taking only 1000 doc
-            split_ratio = 0.02
-            text_field = Field(pad_token=None, tokenize=_tokenize_str)
-            class_field = Field()
-            initial = TabularDataset(
-                path=file_path,
-                format="csv",
-                fields=[("text", text_field), ("label", class_field)],
-                skip_header=True,
-            )
+            n_train = int(split_ratio * n_docs)
+            vocabulary = build_vocab(train_ds, tokenizer, n_train)
 
-            dataset, _ = initial.split(
-                split_ratio=split_ratio, random_state=random.getstate()
-            )
+            # HACK: HUGE hack (to make it work with torchtext==0.10.0) -> reload train_ds
+            train_ds = IMDB(DATA_DIR, split="train")
 
-            if verbose:
-                print("building vocabulary...")
-            text_field.build_vocab(dataset)
-            if verbose:
-                print("done!")
+            # HACK: transform into list the original dataset. BAD if large.
+            raw_data = list(map(
+                lambda e: torch.tensor([vocabulary[token]
+                                        for token in tokenizer(e[1])]),
+                list(train_ds)[:n_train]))
+
+            dataset = (raw_data, vocabulary)
+
         elif implem == "gensim":
 
             dataset = list(read_corpus(file_path, int(split_ratio * n_docs)))

@@ -6,11 +6,11 @@ Functions for the inference.
 
 """
 
-import numpy as np
+import torch
 
-from scipy.special import softmax
+from torch.nn.functional import softmax
 
-from numpy.matlib import repmat
+from . import ParagraphVectorVariant
 
 
 def global_neighborhood(T, winsize=5):
@@ -25,10 +25,10 @@ def global_neighborhood(T, winsize=5):
         (T-2*winsize,2*winsize) array with all neighborhood indices
 
     """
-    aux_0 = np.arange(winsize)
-    aux_1 = np.ones((T - 2 * winsize, 2 * winsize), dtype=int)
-    start = np.concatenate((aux_0, winsize + 1 + aux_0))
-    incr = np.cumsum(aux_1, axis=0) - aux_1
+    aux_0 = torch.arange(winsize)
+    aux_1 = torch.ones((T - 2 * winsize, 2 * winsize), dtype=torch.int)
+    start = torch.cat((aux_0, winsize + 1 + aux_0))
+    incr = torch.cumsum(aux_1, dim=0) - aux_1
     return start + incr
 
 
@@ -56,19 +56,19 @@ def global_context_vectors(example, P_matrix, model, winsize=5):
         (dim,T-2*winsize) array with all context vectors
     """
     gc = global_context(example, winsize=winsize)
-    if model == "PVDMconcat":
+    if model == ParagraphVectorVariant.PVDMconcat:
         T = len(example)
         D = int(P_matrix.shape[1] / (2 * winsize))
-        indices = gc + D * repmat(np.arange(2 * winsize), T - 2 * winsize, 1)
-        return np.sum(P_matrix[:, indices], axis=2)
-    elif model == "PVDMmean":
-        return np.sum(P_matrix[:, gc], axis=2)
+        indices = gc + D * torch.tile(torch.arange(2 * winsize), (T - 2 * winsize, 1))
+        return torch.sum(P_matrix[:, indices], dim=2)
+    elif model == ParagraphVectorVariant.PVDMmean:
+        return torch.sum(P_matrix[:, gc], dim=2)
     else:
         print("Not implemented!")
         return 0
 
 
-def global_softmax(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, winsize=5):
+def global_softmax(q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW, P_matrix=None, winsize=5):
     """
     All the softmax values for the doc.
 
@@ -76,22 +76,22 @@ def global_softmax(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, wins
         (D,T-2*winsize) array with all softmax values
     """
     T = len(example)
-    if model == "PVDBOW":
-        aux_h = repmat(np.dot(R_matrix, q_vec), T - 2 * winsize, 1).T
-        sm = softmax(aux_h, axis=0)
-    elif model == "PVDMmean" or model == "PVDMconcat":
+    if model == ParagraphVectorVariant.PVDBOW:
+        aux_h = torch.tile(torch.dot(R_matrix, q_vec), (T - 2 * winsize, 1)).T
+        sm = softmax(aux_h, dim=0)
+    elif model == ParagraphVectorVariant.PVDMmean or model == ParagraphVectorVariant.PVDMconcat:
         gcv = global_context_vectors(example, P_matrix, model=model, winsize=winsize)
         aux_h = (
-            np.dot(R_matrix, gcv)
-            + repmat(np.dot(R_matrix, q_vec), T - 2 * winsize, 1).T
+            torch.matmul(R_matrix, gcv)
+            + torch.tile(torch.matmul(R_matrix, q_vec), (T - 2 * winsize, 1)).T
         )
-        sm = softmax(aux_h, axis=0)
+        sm = softmax(aux_h, dim=0)
     else:
         print("Not implemented!")
     return sm
 
 
-def global_psi(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, winsize=5):
+def global_psi(q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW, P_matrix=None, winsize=5):
     """
     All values of \psi
     """
@@ -99,12 +99,12 @@ def global_psi(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, winsize=
     aux_s = global_softmax(
         q_vec, example, R_matrix, model=model, P_matrix=P_matrix, winsize=winsize
     )
-    psi_wt = -np.log(aux_s[example[winsize : T - winsize], np.arange(T - 2 * winsize)])
+    psi_wt = -torch.log(aux_s[example[winsize : T - winsize], torch.arange(T - 2 * winsize)])
     return psi_wt
 
 
 def objective_helper(
-    q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, winsize=5
+    q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW, P_matrix=None, winsize=5
 ):
     """
     Value of the objective function.
@@ -112,14 +112,14 @@ def objective_helper(
     psi_wt = global_psi(
         q_vec, example, R_matrix, model=model, P_matrix=P_matrix, winsize=winsize
     )
-    return np.sum(psi_wt)
+    return torch.sum(psi_wt)
 
 
 def compute_objective(
     q_vec,
     example_orig,
     R_matrix,
-    model="PVDBOW",
+    model=ParagraphVectorVariant.PVDBOW,
     P_matrix=None,
     mode="true",
     example_new=None,
@@ -168,12 +168,12 @@ def global_indic(example, D, winsize=5):
         (D,T-2*winsize) array
     """
     T = len(example)
-    aux_1 = np.zeros((D, T - 2 * winsize))
-    aux_1[example[winsize : T - winsize], np.arange(T - 2 * winsize)] = 1.0
+    aux_1 = torch.zeros((D, T - 2 * winsize))
+    aux_1[example[winsize : T - winsize], torch.arange(T - 2 * winsize)] = 1.0
     return aux_1
 
 
-def global_gradient(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, winsize=5):
+def global_gradient(q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW, P_matrix=None, winsize=5):
     """
     All gradients.
     """
@@ -182,24 +182,24 @@ def global_gradient(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, win
         q_vec, example, R_matrix, model=model, P_matrix=P_matrix, winsize=winsize
     )
     aux_1 = global_indic(example, D, winsize=winsize)
-    return np.dot(R_matrix.T, aux_s - aux_1)
+    return torch.matmul(R_matrix.T, aux_s - aux_1)
 
 
-def gradient_helper(q_vec, example, R_matrix, model="PVDBOW", P_matrix=None, winsize=5):
+def gradient_helper(q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW, P_matrix=None, winsize=5):
     """
     Return the full gradient at the point.
     """
     all_grad = global_gradient(
         q_vec, example, R_matrix, model=model, P_matrix=P_matrix, winsize=winsize
     )
-    return np.sum(all_grad, axis=1)
+    return torch.sum(all_grad, dim=1)
 
-
+# TODO: Transform it in Torch code
 def compute_gradient(
     q_vec,
     example_orig,
     R_matrix,
-    model="PVDBOW",
+    model=ParagraphVectorVariant.PVDBOW,
     P_matrix=None,
     mode="true",
     example_new=None,
@@ -213,24 +213,24 @@ def compute_gradient(
     D, dim = R_matrix.shape
     T = len(example_orig)
 
-    if model == "PVDBOW":
+    if model == ParagraphVectorVariant.PVDBOW:
         if mode == "true":
-            grad = (T - 2 * winsize) * np.dot(
-                R_matrix.T, softmax(np.dot(R_matrix, q_vec))
-            ) - np.sum(R_matrix[example_orig[winsize : T - winsize], :], 0)
+            grad = (T - 2 * winsize) * torch.matmul(
+                R_matrix.T, softmax(torch.matmul(R_matrix, q_vec), dim=0)
+            ) - torch.sum(R_matrix[example_orig[winsize : T - winsize], :], 0)
 
         elif mode == "linear":
-            grad_orig = (T - 2 * winsize) * np.dot(
-                R_matrix.T, softmax(np.dot(R_matrix, q_vec))
-            ) - np.sum(R_matrix[example_orig[winsize : T - winsize], :], 0)
-            grad_new = (T - 2 * winsize) * np.dot(
-                R_matrix.T, softmax(np.dot(R_matrix, q_vec))
-            ) - np.sum(R_matrix[example_new[winsize : T - winsize], :], 0)
+            grad_orig = (T - 2 * winsize) * torch.matmul(
+                R_matrix.T, softmax(torch.matmul(R_matrix, q_vec), dim=0)
+            ) - torch.sum(R_matrix[example_orig[winsize : T - winsize], :], 0)
+            grad_new = (T - 2 * winsize) * torch.matmul(
+                R_matrix.T, softmax(torch.matmul(R_matrix, q_vec), dim=0)
+            ) - torch.sum(R_matrix[example_new[winsize : T - winsize], :], 0)
             grad = lbda * grad_new + (1 - lbda) * grad_orig
 
         else:
             print("not implemented!")
-    elif model == "PVDMmean" or model == "PVDMconcat":
+    elif model == ParagraphVectorVariant.PVDMmean or model == ParagraphVectorVariant.PVDMconcat:
         if mode == "true":
             grad = gradient_helper(
                 q_vec,
@@ -262,14 +262,14 @@ def compute_gradient(
             print("Not implemented!")
     else:
         print("Not implemented!")
-        grad = np.zeros((dim,))
+        grad = torch.zeros((dim,))
     return grad
 
 
 def compute_embedding(
     example_orig,
     R_matrix,
-    model="PVDBOW",
+    model=ParagraphVectorVariant.PVDBOW,
     P_matrix=None,
     mode="true",
     example_new=None,
@@ -285,20 +285,23 @@ def compute_embedding(
     Computing the embedding.
     """
     if gamma is None:
-        if model == "PVDMmean" or model == "PVDMconcat":
+        if model == ParagraphVectorVariant.PVDMmean or model == ParagraphVectorVariant.PVDMconcat:
             gamma = 0.01
         else:
             gamma = 0.005
     if n_steps is None:
-        if model == "PVDMmean" or model == "PVDMconcat":
+        if model == ParagraphVectorVariant.PVDMmean or model == ParagraphVectorVariant.PVDMconcat:
             n_steps = 100
         else:
             n_steps = 200
+    # HACK: make it work on CPU for the moment
+    R_matrix = R_matrix.cpu()
+    P_matrix = P_matrix.cpu()
     D, dim = R_matrix.shape
-    q_vec = np.zeros((dim,))
-    traj_store = np.zeros((n_steps, dim))
+    q_vec = torch.zeros((dim,))
+    traj_store = torch.zeros((n_steps, dim))
     traj_store[0] = q_vec
-    obj_store = np.zeros((n_steps,))
+    obj_store = torch.zeros((n_steps,))
     if track_objective:
         obj_store[0] = compute_objective(
             q_vec,

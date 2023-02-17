@@ -27,12 +27,12 @@ large_fs = 35
 lw = 3
 
 # examples to plot
-examples = [0, 1, 3]  # [0,1,3,7,10]
+examples = [0]
 
 # parameters of the experiment
 data = "IMDB"
-implem = "gensim"
-model = "PVDMconcat"
+implem = "local"
+model = "PVDMmean"
 
 # get unique identifier and create relevant folders
 vectorizer_name = get_vectorizer_name(data, implem, model)
