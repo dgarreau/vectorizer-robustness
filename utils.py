@@ -76,7 +76,9 @@ def build_vocab(dataset, tokenizer, n_doc):
         else:
             break
         cur_n += 1
-    vocabulary = vocab(counter, min_freq=1, specials=('<unk>'))
+    # FIXME should deal with unknown with special="<unk>"
+    # Not working right now with torchtext==0.10.0
+    vocabulary = vocab(counter, min_freq=1)
     vocabulary.set_default_index(-1)
     return vocabulary
 
@@ -97,12 +99,14 @@ def load_dataset(data, implem, verbose=False, split_ratio=None):
             download_IMDB_dataset()
 
         if implem == "local":
-            # FIXME: randomize and include train also
-            train_ds, _ = IMDB(DATA_DIR, split=("train", "test"))
-            tokenizer = get_tokenizer('basic_english')
+            train_ds = IMDB(DATA_DIR, split="train")
+            tokenizer = _tokenize_str
 
             n_train = int(split_ratio * n_docs)
             vocabulary = build_vocab(train_ds, tokenizer, n_train)
+
+            # HACK: HUGE hack (to make it work with torchtext==0.10.0) -> reload train_ds
+            train_ds = IMDB(DATA_DIR, split="train")
 
             # HACK: transform into list the original dataset. BAD if large.
             raw_data = list(map(

@@ -93,6 +93,7 @@ class Trainer:
             # end of epoch
             loss = torch.mean(torch.FloatTensor(loss))
             loss_values.append(loss)
+            # NOTE should be divided by the batchsize
 
             epoch_end = time.time()
 
