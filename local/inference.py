@@ -297,7 +297,6 @@ def compute_embedding(
     # HACK: make it work on CPU for the moment
     R_matrix = R_matrix.cpu()
     P_matrix = P_matrix.cpu()
-    Q_matrix = Q_matrix.cpu()
     D, dim = R_matrix.shape
     q_vec = torch.zeros((dim,))
     traj_store = torch.zeros((n_steps, dim))
