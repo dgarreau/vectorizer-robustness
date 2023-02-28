@@ -37,17 +37,35 @@ class ParagraphVectorInference(nn.Module):
             self.alpha = 0.0001
         self.q = nn.Parameter(torch.zeros(self.R_array.shape[1]), requires_grad=True)
 
-    def forward(self, orig):
-        return compute_objective(
-            self.q,
-            orig,
-            self.R_array,
-            self.variant,
-            self.P_array,
-            self.mode,
-            context_size=self.context_size,
-            alpha=self.alpha,
-        )
+    def forward(self, orig, new=None, lbda=None):
+        if self.mode == "true":
+            obj = global_psi(
+                self.q,
+                orig,
+                self.R_array,
+                model=self.variant,
+                P_matrix=self.P_array,
+                context_size=self.context_size,
+            ).sum()
+        elif self.mode == "linear":
+            obj_orig = global_psi(
+                self.q,
+                orig,
+                self.R_array,
+                model=self.variant,
+                P_matrix=self.P_array,
+                context_size=self.context_size,
+            ).sum()
+            obj_new = global_psi(
+                self.q,
+                new,
+                self.R_array,
+                model=self.variant,
+                P_matrix=self.P_array,
+                context_size=self.context_size,
+            ).sum()
+            obj = lbda * obj_new + (1 - lbda) * obj_orig
+        return 1.0 / len(orig) * obj + 0.5 * self.alpha * torch.norm(self.q) ** 2
 
     def infer(
         self, tokenized_doc, n_steps, gamma, track_objective=False, verbose=False
@@ -187,71 +205,3 @@ def global_psi(
         ]
     )
     return psi_wt
-
-
-def objective_helper(
-    q_vec,
-    example,
-    R_matrix,
-    model=ParagraphVectorVariant.PVDBOW,
-    P_matrix=None,
-    context_size=5,
-):
-    """
-    Value of the objective function.
-    """
-    psi_wt = global_psi(
-        q_vec,
-        example,
-        R_matrix,
-        model=model,
-        P_matrix=P_matrix,
-        context_size=context_size,
-    )
-    return torch.sum(psi_wt)
-
-
-def compute_objective(
-    q_vec,
-    example_orig,
-    R_matrix,
-    model=ParagraphVectorVariant.PVDBOW,
-    P_matrix=None,
-    mode="true",
-    example_new=None,
-    lbda=None,
-    pert_ind=None,
-    context_size=5,
-    alpha=0.0001,
-):
-    """
-    Compute the objective function.
-    """
-    if mode == "true":
-        obj = objective_helper(
-            q_vec,
-            example_orig,
-            R_matrix,
-            model=model,
-            P_matrix=P_matrix,
-            context_size=context_size,
-        )
-    elif mode == "linear":
-        obj_orig = objective_helper(
-            q_vec,
-            example_orig,
-            R_matrix,
-            model=model,
-            P_matrix=P_matrix,
-            context_size=context_size,
-        )
-        obj_new = objective_helper(
-            q_vec,
-            example_new,
-            R_matrix,
-            model=model,
-            P_matrix=P_matrix,
-            context_size=context_size,
-        )
-        obj = lbda * obj_new + (1 - lbda) * obj_orig
-    return 1.0 / len(example_orig) * obj + 0.5 * alpha * torch.norm(q_vec) ** 2
