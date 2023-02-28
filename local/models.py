@@ -19,7 +19,6 @@ from os.path import join
 
 from .inference import ParagraphVectorInference
 from . import ParagraphVectorVariant
-from local import inference
 
 #FIXME I don't like the fact that __init__ depends on the number of documents.
 class ParagraphVector(nn.Module):
@@ -213,4 +212,5 @@ class ParagraphVector(nn.Module):
         tokenized_doc = torch.tensor([stoi[w] for w in document], dtype=torch.long)
         
         inference_model = ParagraphVectorInference(R_array, P_array, self.variant, winsize=self.context_size)
-        return inference_model.infer(tokenized_doc, n_steps, gamma, track_objective=track_objective, verbose=verbose)
+        q_vec, _, loss_values =  inference_model.infer(tokenized_doc, n_steps, gamma, track_objective=track_objective, verbose=verbose)
+        return q_vec
