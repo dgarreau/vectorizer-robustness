@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from os.path import join
 
 from gensim.models.doc2vec import Doc2Vec
+from local import ParagraphVectorVariant
 
 from utils import get_vectorizer_name
 from utils import MODELS_DIR, RESULTS_DIR, FIGS_DIR
@@ -28,7 +29,7 @@ np.random.seed(seed)
 # parameters of the experiment
 data = "IMDB"
 implem = "gensim"
-model = "PVDBOW"
+model = ParagraphVectorVariant.PVDBOW
 
 winsize = 5
 
@@ -100,7 +101,7 @@ for ex in examples:
     ax.plot(norm_dict[ex])
 
 # setting up the figure title and file name
-s_title = model + ", norm of $q_0$"
+s_title = model.name + ", norm of $q_0$"
 fig_name = join(figs_dir, vectorizer_name + ".pdf")
 ax.set_title(s_title, fontsize=large_fs)
 

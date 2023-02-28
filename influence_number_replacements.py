@@ -32,7 +32,7 @@ np.random.seed(seed)
 # parameters of the experiment
 data = "IMDB"
 implem = "local"
-model = "PVDMmean"
+model = ParagraphVectorVariant.PVDBOW
 
 # get unique identifier and create relevant folder
 vectorizer_name = get_vectorizer_name(data, implem, model)
@@ -51,18 +51,7 @@ elif implem == "scikit":
         vectorizer = pickle.load(f)
 elif implem == "local":
     dataset, vocabulary = dataset
-    if model == "PVDMmean":
-        vectorizer = ParagraphVector(
-            vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDMmean
-        )
-    elif model == "PVDMconcat":
-        vectorizer = ParagraphVector(
-            vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDMconcat
-        )
-    elif model == "PVDBOW":
-        vectorizer = ParagraphVector(
-            vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDBOW
-        )
+    vectorizer = ParagraphVector(vocabulary, len(dataset), variant=model)
     vectorizer.load(vectorizer_name)
 
 

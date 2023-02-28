@@ -48,14 +48,7 @@ class Trainer:
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         if self.verbose:
-            if model.variant == ParagraphVectorVariant.PVDMconcat:
-                print("PVDM-concat training starts:")
-            elif model.variant == ParagraphVectorVariant.PVDMmean:
-                print("PVDM-mean training starts:")
-            elif model.variant == ParagraphVectorVariant.PVDBOW:
-                print("PVDBOW training starts:")
-            else:
-                raise NotImplementedError
+            print (f"{model.variant.name} training starts:")
             print("N = {:d}".format(model.n_docs))
             print("D = {:d}".format(model.n_words))
             print("d = {:d}".format(model.dim))

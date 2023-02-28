@@ -51,7 +51,8 @@ RESULTS_DIR = join(_root_dir, "results")
 
 
 def get_vectorizer_name(data, implem, model):
-    return data + "_" + implem + "_" + model
+    model_name = model.name if hasattr(model, "name") else model
+    return data + "_" + implem + "_" + model_name
 
 
 def mkdir(mypath):

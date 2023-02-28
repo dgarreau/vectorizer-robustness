@@ -21,7 +21,7 @@ np.random.seed(seed)
 
 # parameters of the experiment
 data = "IMDB"
-model = "PVDMconcat"
+model = ParagraphVectorVariant.PVDBOW
 
 # load dataset
 dataset = load_dataset(data, "local", verbose=True)
@@ -29,12 +29,7 @@ dataset = load_dataset(data, "local", verbose=True)
 # load vectorizer
 vectorizer_name = get_vectorizer_name(data, "local", model)
 dataset, vocabulary = dataset
-variant = {
-    "PVDMmean": ParagraphVectorVariant.PVDMmean,
-    "PVDMconcat": ParagraphVectorVariant.PVDMconcat,
-    "PVDBOW": ParagraphVectorVariant.PVDBOW,
-}.get(model)
-vectorizer = ParagraphVector(vocabulary, len(dataset), variant=variant)
+vectorizer = ParagraphVector(vocabulary, len(dataset), variant=model)
 vectorizer.load(vectorizer_name)
 vocab = vectorizer.vocabulary.get_itos()
 

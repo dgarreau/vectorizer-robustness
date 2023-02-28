@@ -52,8 +52,8 @@ if __name__ == "__main__":
 
     # parameters of the experiment
     data = "IMDB"
-    implem = "local"
-    model = "PVDBOW"
+    implem = "gensim"
+    model = ParagraphVectorVariant.PVDBOW
 
     # unique identifier
     vectorizer_name = get_vectorizer_name(data, implem, model)
@@ -68,21 +68,11 @@ if __name__ == "__main__":
         dim = 50
         n_epochs = 100
 
-        if model == "PVDMmean":
-            dm = 1
-            dm_mean = 1
-            dm_concat = 0
-            dbow_words = 1
-        elif model == "PVDMconcat":
-            dm = 1
-            dm_mean = 0
-            dm_concat = 1
-            dbow_words = 1
-        elif model == "PVDBOW":
-            dm = 0
-            dm_mean = None
-            dm_concat = None
-            dbow_words = 0
+        dm, dm_mean, dm_concat, dbow_words = {
+            ParagraphVectorVariant.PVDMmean: (1, 1, 0, 1),
+            ParagraphVectorVariant.PVDMconcat: (1, 0, 1, 1),
+            ParagraphVectorVariant.PVDBOW: (0, None, None, 0),
+        }.get(model)
 
         vectorizer = gensim.models.doc2vec.Doc2Vec(
             vector_size=dim,
@@ -138,33 +128,18 @@ if __name__ == "__main__":
         n_epochs = 100
 
         raw_data, vocabulary = dataset
-        if model == "PVDMmean":
-            lr = 0.001
-            vectorizer = ParagraphVector(
-                vocabulary,
-                len(raw_data),
-                dim=dim,
-                context_size=winsize,
-                variant=ParagraphVectorVariant.PVDMmean,
-            )
-        elif model == "PVDMconcat":
-            lr = 0.0005
-            vectorizer = ParagraphVector(
-                vocabulary,
-                len(raw_data),
-                dim=dim,
-                context_size=winsize,
-                variant=ParagraphVectorVariant.PVDMconcat,
-            )
-        elif model == "PVDBOW":
-            lr = 0.001
-            vectorizer = ParagraphVector(
-                vocabulary,
-                len(raw_data),
-                dim=dim,
-                context_size=winsize,
-                variant=ParagraphVectorVariant.PVDBOW,
-            )
+        vectorizer = ParagraphVector(
+            vocabulary,
+            len(raw_data),
+            dim=dim,
+            context_size=winsize,
+            variant=model,
+        )
+        lr = {
+            ParagraphVectorVariant.PVDMmean: 0.001,
+            ParagraphVectorVariant.PVDMconcat: 0.0005,
+            ParagraphVectorVariant.PVDBOW: 0.001,
+        }.get(model)
 
         # training the model
         trainer = Trainer(lr=lr, batch_size=4096, n_epochs=n_epochs, verbose=True)

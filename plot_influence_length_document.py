@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from os.path import join
+from local import ParagraphVectorVariant
 
 from utils import get_vectorizer_name
 from utils import RESULTS_DIR, FIGS_DIR
@@ -32,7 +33,7 @@ examples = [0]
 # parameters of the experiment
 data = "IMDB"
 implem = "local"
-model = "PVDBOW"
+model = ParagraphVectorVariant.PVDBOW
 
 # get unique identifier and create relevant folders
 vectorizer_name = get_vectorizer_name(data, implem, model)
