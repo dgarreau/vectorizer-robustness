@@ -123,11 +123,11 @@ def load_dataset(data, implem, verbose=False, split_ratio=None):
             dataset = list(df["review"][: int(split_ratio * n_docs)])
 
         else:
-            print("not implemented")
+            raise NotImplementedError
 
     else:
         dataset = []
-        print("not implemented")
+        raise NotImplementedError
 
     print("done!")
     print()

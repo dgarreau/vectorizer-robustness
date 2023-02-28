@@ -129,7 +129,7 @@ if __name__ == '__main__':
                 pickle.dump(vectorizer, f)
 
         else:
-            print("not implemented")
+            raise NotImplementedError
 
     elif implem == "local":
 
@@ -156,5 +156,4 @@ if __name__ == '__main__':
         vectorizer.save(vectorizer_name, verbose=True)
 
     else:
-
-        print("not implemented")
+        raise NotImplementedError

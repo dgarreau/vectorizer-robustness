@@ -109,8 +109,7 @@ def global_context_vectors(example, P_matrix, model, context_size=5):
     elif model == ParagraphVectorVariant.PVDMmean:
         return torch.sum(P_matrix[:, gc], dim=2)
     else:
-        print("Not implemented!")
-        return 0
+        raise NotImplementedError
 
 
 def global_softmax(q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW, P_matrix=None, context_size=5):
@@ -132,7 +131,7 @@ def global_softmax(q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW
         )
         sm = softmax(aux_h, dim=0)
     else:
-        print("Not implemented!")
+        raise NotImplementedError
     return sm
 
 
