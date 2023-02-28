@@ -52,11 +52,17 @@ elif implem == "scikit":
 elif implem == "local":
     dataset, vocabulary = dataset
     if model == "PVDMmean":
-        vectorizer = ParagraphVector(vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDMmean)
+        vectorizer = ParagraphVector(
+            vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDMmean
+        )
     elif model == "PVDMconcat":
-        vectorizer = ParagraphVector(vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDMconcat)
+        vectorizer = ParagraphVector(
+            vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDMconcat
+        )
     elif model == "PVDBOW":
-        vectorizer = ParagraphVector(vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDBOW)
+        vectorizer = ParagraphVector(
+            vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDBOW
+        )
     vectorizer.load(vectorizer_name)
 
 
@@ -96,7 +102,6 @@ for ex in examples:
         ex_orig = dataset[ex]
         ex_orig_list = list(map(lambda u: vocab[u], ex_orig))
     T = len(ex_orig_list)
-
 
     # original embedding
     if implem == "gensim":

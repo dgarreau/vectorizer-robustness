@@ -94,10 +94,10 @@ def load_dataset(data, implem, verbose=False, split_ratio=None):
             download_IMDB_dataset()
 
         if implem == "local":
-            _, train_ds = IMDB(DATA_DIR) # WTF torchtext?????
+            _, train_ds = IMDB(DATA_DIR)  # WTF torchtext?????
             n_train = int(split_ratio * n_docs)
             train_raw = list(train_ds)
-            random.seed(4) # WTF BIS torchtext!!!!!
+            random.seed(4)  # WTF BIS torchtext!!!!!
             random.shuffle(train_raw)
             train_raw = train_raw[:n_train]
 
@@ -105,13 +105,17 @@ def load_dataset(data, implem, verbose=False, split_ratio=None):
             vocabulary = build_vocab(train_raw, tokenizer)
 
             # HACK: transform into list the original dataset. BAD if large.
-            raw_data = list(map(
-                lambda e: torch.tensor([vocabulary[token]
-                                        for token in tokenizer(e[1])]),
-                train_raw))
+            raw_data = list(
+                map(
+                    lambda e: torch.tensor(
+                        [vocabulary[token] for token in tokenizer(e[1])]
+                    ),
+                    train_raw,
+                )
+            )
 
-            #labels = list(map(lambda e: e[0], train_raw))
-            dataset = (raw_data, vocabulary)#, labels)
+            # labels = list(map(lambda e: e[0], train_raw))
+            dataset = (raw_data, vocabulary)  # , labels)
 
         elif implem == "gensim":
 

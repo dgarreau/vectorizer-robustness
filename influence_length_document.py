@@ -53,11 +53,17 @@ elif implem == "scikit":
 elif implem == "local":
     dataset, vocabulary = dataset
     if model == "PVDMmean":
-        vectorizer = ParagraphVector(vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDMmean)
+        vectorizer = ParagraphVector(
+            vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDMmean
+        )
     elif model == "PVDMconcat":
-        vectorizer = ParagraphVector(vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDMconcat)
+        vectorizer = ParagraphVector(
+            vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDMconcat
+        )
     elif model == "PVDBOW":
-        vectorizer = ParagraphVector(vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDBOW)
+        vectorizer = ParagraphVector(
+            vocabulary, len(dataset), variant=ParagraphVectorVariant.PVDBOW
+        )
     vectorizer.load(vectorizer_name)
 
 # get relevant parameters
@@ -107,7 +113,7 @@ for ex in examples:
     t_start = time.time()
     for current_length in range(2 * winsize + 1, t_max + 1):
         print("{} / {}".format(current_length - 2 * winsize, n_length))
-        ex_current_list = ex_orig_list[:current_length]#.copy() do i need to cpy?
+        ex_current_list = ex_orig_list[:current_length]  # .copy() do i need to cpy?
         ex_current = " ".join(ex_current_list)
 
         if implem == "gensim":

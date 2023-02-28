@@ -40,7 +40,7 @@ from utils import get_vectorizer_name
 from utils import load_dataset
 from utils import MODELS_DIR, mkdir
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     # create folder to save data
     mkdir(MODELS_DIR)
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     vectorizer_name = get_vectorizer_name(data, implem, model)
 
     # load data
-    dataset = load_dataset(data, implem, split_ratio = 0.02, verbose=True)
+    dataset = load_dataset(data, implem, split_ratio=0.02, verbose=True)
 
     # instanciate the model
     winsize = 5
@@ -140,13 +140,31 @@ if __name__ == '__main__':
         raw_data, vocabulary = dataset
         if model == "PVDMmean":
             lr = 0.001
-            vectorizer = ParagraphVector(vocabulary, len(raw_data), dim=dim, context_size=winsize, variant=ParagraphVectorVariant.PVDMmean)
+            vectorizer = ParagraphVector(
+                vocabulary,
+                len(raw_data),
+                dim=dim,
+                context_size=winsize,
+                variant=ParagraphVectorVariant.PVDMmean,
+            )
         elif model == "PVDMconcat":
             lr = 0.0005
-            vectorizer = ParagraphVector(vocabulary, len(raw_data), dim=dim, context_size=winsize, variant=ParagraphVectorVariant.PVDMconcat)
+            vectorizer = ParagraphVector(
+                vocabulary,
+                len(raw_data),
+                dim=dim,
+                context_size=winsize,
+                variant=ParagraphVectorVariant.PVDMconcat,
+            )
         elif model == "PVDBOW":
             lr = 0.001
-            vectorizer = ParagraphVector(vocabulary, len(raw_data), dim=dim, context_size=winsize, variant=ParagraphVectorVariant.PVDBOW)
+            vectorizer = ParagraphVector(
+                vocabulary,
+                len(raw_data),
+                dim=dim,
+                context_size=winsize,
+                variant=ParagraphVectorVariant.PVDBOW,
+            )
 
         # training the model
         trainer = Trainer(lr=lr, batch_size=4096, n_epochs=n_epochs, verbose=True)

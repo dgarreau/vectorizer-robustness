@@ -41,7 +41,9 @@ vocab = vectorizer.vocabulary.get_itos()
 ex = 0
 ex_orig = dataset[ex]
 document = list(map(lambda u: vocab[u], ex_orig))
-q_vec_torch, _, loss_values = vectorizer.infer(document, n_steps=100, verbose=True, track_objective=True)
+q_vec_torch, _, loss_values = vectorizer.infer(
+    document, n_steps=100, verbose=True, track_objective=True
+)
 
 plt.semilogy(np.array(loss_values) - loss_values[-1], label="SGD")
 plt.legend()

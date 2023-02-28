@@ -11,6 +11,7 @@ from .data import ContexifiedDataSet
 from .loss import LogSoftmax
 from . import ParagraphVectorVariant
 
+
 def _print_progress(epoch_i, batch_i, num_batches):
     progress = round((batch_i + 1) / num_batches * 100)
     print("\rEpoch {:d}".format(epoch_i + 1), end="")
@@ -19,18 +20,14 @@ def _print_progress(epoch_i, batch_i, num_batches):
 
 
 class Trainer:
-    def __init__(self,
-                 lr=0.002,
-                 n_epochs=100,
-                 batch_size=32,
-                 num_workers=8,
-                 verbose=False):
+    def __init__(
+        self, lr=0.002, n_epochs=100, batch_size=32, num_workers=8, verbose=False
+    ):
         self.lr = lr
         self.n_epochs = n_epochs
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.verbose = verbose
-
 
     def fit(self, model, dataset):
         raw_data, _ = dataset
@@ -82,7 +79,9 @@ class Trainer:
             for batch in dataloader:
                 context_ids, doc_ids, target_ids = batch
                 x = model(context_ids, doc_ids)
-                lengths = torch.tensor([len(raw_data[idx]) for idx in doc_ids], requires_grad=False).to(device)              
+                lengths = torch.tensor(
+                    [len(raw_data[idx]) for idx in doc_ids], requires_grad=False
+                ).to(device)
                 x = cost_func(x, target_ids, lengths)
                 loss.append(x.item())
                 model.zero_grad()

@@ -14,15 +14,17 @@ from torch.nn.functional import softmax
 
 from . import ParagraphVectorVariant
 
-class ParagraphVectorInference(nn.Module):
 
-    def __init__(self,
-                 R_array,
-                 P_array,
-                 variant=ParagraphVectorVariant.PVDBOW,
-                 mode="true",
-                 context_size=5,
-                 alpha=None):
+class ParagraphVectorInference(nn.Module):
+    def __init__(
+        self,
+        R_array,
+        P_array,
+        variant=ParagraphVectorVariant.PVDBOW,
+        mode="true",
+        context_size=5,
+        alpha=None,
+    ):
         super().__init__()
         self.R_array = R_array.detach().cpu()
         self.P_array = P_array.detach().cpu()
@@ -32,15 +34,26 @@ class ParagraphVectorInference(nn.Module):
         if alpha:
             self.alpha = alpha
         else:
-            self.alpha = .0001
+            self.alpha = 0.0001
         self.q = nn.Parameter(torch.zeros(self.R_array.shape[1]), requires_grad=True)
 
     def forward(self, orig):
-        return compute_objective(self.q, orig, self.R_array, self.variant, self.P_array, self.mode, context_size=self.context_size, alpha=self.alpha)
+        return compute_objective(
+            self.q,
+            orig,
+            self.R_array,
+            self.variant,
+            self.P_array,
+            self.mode,
+            context_size=self.context_size,
+            alpha=self.alpha,
+        )
 
-    def infer(self, tokenized_doc, n_steps, gamma, track_objective=False, verbose=False):
+    def infer(
+        self, tokenized_doc, n_steps, gamma, track_objective=False, verbose=False
+    ):
         optimizer = SGD(params=self.parameters(), lr=gamma)
-        
+
         infer_start = time.time()
         loss_values = []
         for i_epoch in range(n_steps):
@@ -55,7 +68,6 @@ class ParagraphVectorInference(nn.Module):
             print("auto ({:.4f}s)".format(infer_end - infer_start))
 
         return self.q.detach(), None, loss_values
-
 
 
 def global_neighborhood(T, context_size=5):
@@ -104,7 +116,9 @@ def global_context_vectors(example, P_matrix, model, context_size=5):
     if model == ParagraphVectorVariant.PVDMconcat:
         T = len(example)
         D = int(P_matrix.shape[1] / (2 * context_size))
-        indices = gc + D * torch.tile(torch.arange(2 * context_size), (T - 2 * context_size, 1))
+        indices = gc + D * torch.tile(
+            torch.arange(2 * context_size), (T - 2 * context_size, 1)
+        )
         return torch.sum(P_matrix[:, indices], dim=2)
     elif model == ParagraphVectorVariant.PVDMmean:
         return torch.sum(P_matrix[:, gc], dim=2)
@@ -112,7 +126,14 @@ def global_context_vectors(example, P_matrix, model, context_size=5):
         raise NotImplementedError
 
 
-def global_softmax(q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW, P_matrix=None, context_size=5):
+def global_softmax(
+    q_vec,
+    example,
+    R_matrix,
+    model=ParagraphVectorVariant.PVDBOW,
+    P_matrix=None,
+    context_size=5,
+):
     """
     All the softmax values for the doc.
 
@@ -123,8 +144,13 @@ def global_softmax(q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW
     if model == ParagraphVectorVariant.PVDBOW:
         aux_h = torch.tile(torch.matmul(R_matrix, q_vec), (T - 2 * context_size, 1)).T
         sm = softmax(aux_h, dim=0)
-    elif model == ParagraphVectorVariant.PVDMmean or model == ParagraphVectorVariant.PVDMconcat:
-        gcv = global_context_vectors(example, P_matrix, model=model, context_size=context_size)
+    elif (
+        model == ParagraphVectorVariant.PVDMmean
+        or model == ParagraphVectorVariant.PVDMconcat
+    ):
+        gcv = global_context_vectors(
+            example, P_matrix, model=model, context_size=context_size
+        )
         aux_h = (
             torch.matmul(R_matrix, gcv)
             + torch.tile(torch.matmul(R_matrix, q_vec), (T - 2 * context_size, 1)).T
@@ -135,26 +161,52 @@ def global_softmax(q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW
     return sm
 
 
-def global_psi(q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW, P_matrix=None, context_size=5):
+def global_psi(
+    q_vec,
+    example,
+    R_matrix,
+    model=ParagraphVectorVariant.PVDBOW,
+    P_matrix=None,
+    context_size=5,
+):
     """
     All values of \psi
     """
     T = len(example)
     aux_s = global_softmax(
-        q_vec, example, R_matrix, model=model, P_matrix=P_matrix, context_size=context_size
+        q_vec,
+        example,
+        R_matrix,
+        model=model,
+        P_matrix=P_matrix,
+        context_size=context_size,
     )
-    psi_wt = -torch.log(aux_s[example[context_size : T - context_size], torch.arange(T - 2 * context_size)])
+    psi_wt = -torch.log(
+        aux_s[
+            example[context_size : T - context_size], torch.arange(T - 2 * context_size)
+        ]
+    )
     return psi_wt
 
 
 def objective_helper(
-    q_vec, example, R_matrix, model=ParagraphVectorVariant.PVDBOW, P_matrix=None, context_size=5
+    q_vec,
+    example,
+    R_matrix,
+    model=ParagraphVectorVariant.PVDBOW,
+    P_matrix=None,
+    context_size=5,
 ):
     """
     Value of the objective function.
     """
     psi_wt = global_psi(
-        q_vec, example, R_matrix, model=model, P_matrix=P_matrix, context_size=context_size
+        q_vec,
+        example,
+        R_matrix,
+        model=model,
+        P_matrix=P_matrix,
+        context_size=context_size,
     )
     return torch.sum(psi_wt)
 
@@ -202,5 +254,4 @@ def compute_objective(
             context_size=context_size,
         )
         obj = lbda * obj_new + (1 - lbda) * obj_orig
-    return 1./len(example_orig) * obj + 0.5 * alpha * torch.norm(q_vec) ** 2
-
+    return 1.0 / len(example_orig) * obj + 0.5 * alpha * torch.norm(q_vec) ** 2
