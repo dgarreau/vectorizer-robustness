@@ -102,7 +102,7 @@ auto_end = time.time()
 
 print("auto ({:.4f}s)".format(auto_start - auto_end))
 
-plt.plot(obj_store, label="manual")
-plt.plot(loss_values, label="SGD")
+plt.semilogy(np.array(obj_store - obj_store[-1]), label="manual")
+plt.semilogy(np.array(loss_values) - loss_values[-1], label="SGD")
 plt.legend()
 plt.show()
