@@ -17,7 +17,7 @@ from utils import MODELS_DIR
 
 from os.path import join
 
-from .inference import compute_embedding
+from .inference import ParagraphVectorInference
 from . import ParagraphVectorVariant
 
 #FIXME I don't like the fact that __init__ depends on the number of documents.
@@ -192,23 +192,28 @@ class ParagraphVector(nn.Module):
         torch.save(self.vocabulary, vocab_file_path)
         torch.save(param_dict, param_file_path)
 
-    def infer(self, document, n_steps=None, gamma=None, track_objective=False):
+    def infer(self, document, n_steps=None, gamma=None, alpha=None, track_objective=False, verbose=False):
         """
         Get embedding.
         """
+        if gamma is None:
+            if self.variant == ParagraphVectorVariant.PVDMmean or self.variant == ParagraphVectorVariant.PVDMconcat:
+                gamma = 0.01
+            else:
+                gamma = 0.001
+        if n_steps is None:
+            if self.variant == ParagraphVectorVariant.PVDMmean or self.variant == ParagraphVectorVariant.PVDMconcat:
+                n_steps = 100
+            else:
+                n_steps = 200
         P_array = self.get_P_matrix()
         R_array = self.get_R_matrix()
         stoi = self.vocabulary.get_stoi()
         tokenized_doc = torch.tensor([stoi[w] for w in document], dtype=torch.long)
-        q_vec, traj_store, obj_store = compute_embedding(
-            tokenized_doc,
-            R_array,
-            model=self.variant,
-            P_matrix=P_array,
-            mode="true",
-            track_objective=track_objective,
-            winsize=self.context_size,
-            n_steps=n_steps,
-            gamma=gamma,
-        )
-        return q_vec#, traj_store, obj_store
+        
+        inference_model = ParagraphVectorInference(R_array, P_array, self.variant, alpha=alpha, winsize=self.context_size)
+        q_vec, _, loss_values =  inference_model.infer(tokenized_doc, n_steps, gamma, track_objective=track_objective, verbose=verbose)
+        if track_objective:
+            return q_vec, None, loss_values
+        else:
+            return q_vec
