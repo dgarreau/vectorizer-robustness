@@ -192,7 +192,7 @@ class ParagraphVector(nn.Module):
         torch.save(self.vocabulary, vocab_file_path)
         torch.save(param_dict, param_file_path)
 
-    def infer(self, document, n_steps=None, gamma=None, track_objective=False, verbose=False):
+    def infer(self, document, n_steps=None, gamma=None, alpha=None, track_objective=False, verbose=False):
         """
         Get embedding.
         """
@@ -211,6 +211,9 @@ class ParagraphVector(nn.Module):
         stoi = self.vocabulary.get_stoi()
         tokenized_doc = torch.tensor([stoi[w] for w in document], dtype=torch.long)
         
-        inference_model = ParagraphVectorInference(R_array, P_array, self.variant, winsize=self.context_size)
+        inference_model = ParagraphVectorInference(R_array, P_array, self.variant, alpha=alpha, winsize=self.context_size)
         q_vec, _, loss_values =  inference_model.infer(tokenized_doc, n_steps, gamma, track_objective=track_objective, verbose=verbose)
-        return q_vec
+        if track_objective:
+            return q_vec, None, loss_values
+        else:
+            return q_vec
