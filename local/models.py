@@ -211,7 +211,7 @@ class ParagraphVector(nn.Module):
         stoi = self.vocabulary.get_stoi()
         tokenized_doc = torch.tensor([stoi[w] for w in document], dtype=torch.long)
         
-        inference_model = ParagraphVectorInference(R_array, P_array, self.variant, alpha=alpha, winsize=self.context_size)
+        inference_model = ParagraphVectorInference(R_array, P_array, self.variant, alpha=alpha, context_size=self.context_size)
         q_vec, _, loss_values =  inference_model.infer(tokenized_doc, n_steps, gamma, track_objective=track_objective, verbose=verbose)
         if track_objective:
             return q_vec, None, loss_values
