@@ -65,42 +65,7 @@ print("manual ({:.4f}s)".format(manual_start - manual_end))
 
 ### New implem
 
-class DirtyInference(nn.Module):
-
-    def __init__(self,
-                 R_array,
-                 P_array,
-                 variant=ParagraphVectorVariant.PVDBOW,
-                 mode="true",):
-        super().__init__()
-        self.R_array = R_array
-        self.P_array = P_array
-        self.variant = variant
-        self.mode = mode
-        self.q = nn.Parameter(torch.zeros(self.R_array.shape[1]), requires_grad=True)
-
-    def forward(self, orig):
-        return compute_objective(self.q, orig, self.R_array, self.variant, self.P_array, self.mode, winsize=vectorizer.context_size)
-
-
-model= DirtyInference(R_array, P_array, variant)
-
-# optimizer
-optimizer = SGD(params=model.parameters(), lr=0.01)
-n_epochs = 1000
-
-# entering the main loop
-auto_start = time.time()
-loss_values = []
-for i_epoch in range(n_epochs):
-    x = model(ex_orig)
-    loss_values.append(x.item())
-    model.zero_grad()
-    x.backward()
-    optimizer.step()
-auto_end = time.time()
-
-print("auto ({:.4f}s)".format(auto_start - auto_end))
+q_vec_torch, _, loss_values = vectorizer.infer(document, n_steps=1000, verbose=True)
 
 plt.semilogy(np.array(obj_store - obj_store[-1]), label="manual")
 plt.semilogy(np.array(loss_values) - loss_values[-1], label="SGD")

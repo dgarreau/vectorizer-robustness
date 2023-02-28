@@ -5,12 +5,52 @@
 Functions for the inference.
 
 """
+import time
 
 import torch
-
+from torch.optim import SGD
+from torch import nn
 from torch.nn.functional import softmax
 
 from . import ParagraphVectorVariant
+
+class ParagraphVectorInference(nn.Module):
+
+    def __init__(self,
+                 R_array,
+                 P_array,
+                 variant=ParagraphVectorVariant.PVDBOW,
+                 mode="true",
+                 winsize=5):
+        super().__init__()
+        self.R_array = R_array
+        self.P_array = P_array
+        self.variant = variant
+        self.mode = mode
+        self.winsize = winsize
+        self.q = nn.Parameter(torch.zeros(self.R_array.shape[1]), requires_grad=True)
+
+    def forward(self, orig):
+        return compute_objective(self.q, orig, self.R_array, self.variant, self.P_array, self.mode, winsize=self.winsize)
+
+    def infer(self, tokenized_doc, n_steps, gamma, track_objective=False, verbose=False):
+        optimizer = SGD(params=self.parameters(), lr=gamma)
+        
+        infer_start = time.time()
+        loss_values = []
+        for i_epoch in range(n_steps):
+            x = self(tokenized_doc)
+            loss_values.append(x.item())
+            self.zero_grad()
+            x.backward()
+            optimizer.step()
+        infer_end = time.time()
+
+        if verbose:
+            print("auto ({:.4f}s)".format(infer_end - infer_start))
+
+        return self.q.detach(), None, loss_values
+
 
 
 def global_neighborhood(T, winsize=5):
