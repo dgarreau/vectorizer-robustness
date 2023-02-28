@@ -24,8 +24,8 @@ class ParagraphVectorInference(nn.Module):
                  winsize=5,
                  alpha=None):
         super().__init__()
-        self.R_array = R_array
-        self.P_array = P_array
+        self.R_array = R_array.detach().cpu()
+        self.P_array = P_array.detach().cpu()
         self.variant = variant
         self.mode = mode
         self.winsize = winsize
