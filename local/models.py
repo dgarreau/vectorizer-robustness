@@ -12,6 +12,8 @@ kudos to https://github.com/inejc/paragraph-vectors
 
 import torch
 import torch.nn as nn
+from local.trainer import Trainer
+from local.data import ContexifiedDataSet
 
 from utils import MODELS_DIR
 
@@ -141,14 +143,14 @@ class ParagraphVector(nn.Module):
             print("loading model from {}".format(model_file_path))
             print()
 
-        self.vocabulary = torch.load(vocab_file_path)
+        self.vocabulary = torch.load(vocab_file_path, map_location=torch.device("cpu"))
 
-        param_dict = torch.load(param_file_path)
+        param_dict = torch.load(param_file_path, map_location=torch.device("cpu"))
         self.context_size = param_dict["nu"]
         self.variant = param_dict["variant"]
 
         # load the model
-        aux = torch.load(model_file_path)
+        aux = torch.load(model_file_path, map_location=torch.device("cpu"))
 
         # two possibilities depending if saved during training or after
         if "_P_matrix" in aux.keys():
@@ -199,6 +201,48 @@ class ParagraphVector(nn.Module):
         torch.save(self.state_dict(), model_file_path)
         torch.save(self.vocabulary, vocab_file_path)
         torch.save(param_dict, param_file_path)
+
+    def new_infer(self, documents, gamma=None, n_epochs=None):
+        if gamma is None:
+            if (
+                self.variant == ParagraphVectorVariant.PVDMmean
+                or self.variant == ParagraphVectorVariant.PVDMconcat
+            ):
+                gamma = 0.01
+            else:
+                gamma = 0.001
+        if n_epochs is None:
+            if (
+                self.variant == ParagraphVectorVariant.PVDMmean
+                or self.variant == ParagraphVectorVariant.PVDMconcat
+            ):
+                n_epochs = 100
+            else:
+                n_epochs = 200
+
+        self._R_matrix.requires_grad = False
+        self._P_matrix.requires_grad = False
+        self._Q_matrix = nn.Parameter(
+            torch.sqrt(torch.tensor([2.0]) / torch.tensor([len(documents) + self.dim]))
+            * torch.randn(len(documents), self.dim)
+            * 0.0,
+            requires_grad=True,
+        )
+
+        inferer = Trainer(
+            lr=gamma,
+            batch_size=4096,
+            n_epochs=n_epochs,
+            num_workers=8,
+            verbose=True,
+            optimizer="sgd",
+        )
+        inferer.fit(self, (documents, None))
+
+        self._R_matrix.requires_grad = True
+        self._P_matrix.requires_grad = True
+
+        return self._Q_matrix.detach()
 
     def infer(
         self,
