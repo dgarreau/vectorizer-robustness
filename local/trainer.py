@@ -43,7 +43,10 @@ class Trainer:
             model.context_size,
         )
         dataloader = DataLoader(
-            ctx_dataset, self.batch_size, num_workers=self.num_workers
+            ctx_dataset,
+            self.batch_size,
+            num_workers=self.num_workers,
+            persistent_workers=True,
         )
         n_batches = len(dataloader)
 
