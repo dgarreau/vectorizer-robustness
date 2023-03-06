@@ -7,7 +7,7 @@ import torch
 from torch.optim import Adam, SGD
 from torch.utils.data import DataLoader
 
-from .data import ContexifiedDataSet
+from .data import ContexifiedDataSet, MultiEpochsDataLoader
 from .loss import LogSoftmax
 from . import ParagraphVectorVariant
 
@@ -42,11 +42,11 @@ class Trainer:
             raw_data,
             model.context_size,
         )
-        dataloader = DataLoader(
+        dataloader = MultiEpochsDataLoader(
             ctx_dataset,
             self.batch_size,
             num_workers=self.num_workers,
-            persistent_workers=True,
+            #persistent_workers=True,
         )
         n_batches = len(dataloader)
 

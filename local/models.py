@@ -234,7 +234,7 @@ class ParagraphVector(nn.Module):
             batch_size=4096,
             n_epochs=n_epochs,
             num_workers=8,
-            verbose=True,
+            verbose=False,
             optimizer="sgd",
         )
         inferer.fit(self, (documents, None))
