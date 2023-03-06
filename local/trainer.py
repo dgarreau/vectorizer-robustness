@@ -4,10 +4,10 @@ import time
 import numpy as np
 
 import torch
-from torch.optim import Adam
+from torch.optim import Adam, SGD
 from torch.utils.data import DataLoader
 
-from .data import ContexifiedDataSet
+from .data import ContexifiedDataSet, MultiEpochsDataLoader
 from .loss import LogSoftmax
 from . import ParagraphVectorVariant
 
@@ -21,13 +21,20 @@ def _print_progress(epoch_i, batch_i, num_batches):
 
 class Trainer:
     def __init__(
-        self, lr=0.002, n_epochs=100, batch_size=32, num_workers=8, verbose=False
+        self,
+        lr=0.002,
+        n_epochs=100,
+        batch_size=32,
+        num_workers=8,
+        verbose=False,
+        optimizer="Adam",
     ):
         self.lr = lr
         self.n_epochs = n_epochs
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.verbose = verbose
+        self.optimizer = optimizer
 
     def fit(self, model, dataset):
         raw_data, _ = dataset
@@ -35,8 +42,11 @@ class Trainer:
             raw_data,
             model.context_size,
         )
-        dataloader = DataLoader(
-            ctx_dataset, self.batch_size, num_workers=self.num_workers
+        dataloader = MultiEpochsDataLoader(
+            ctx_dataset,
+            self.batch_size,
+            num_workers=self.num_workers,
+            #persistent_workers=True,
         )
         n_batches = len(dataloader)
 
@@ -48,7 +58,7 @@ class Trainer:
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
         if self.verbose:
-            print (f"{model.variant.name} training starts:")
+            print(f"{model.variant.name} training starts:")
             print("N = {:d}".format(model.n_docs))
             print("D = {:d}".format(model.n_words))
             print("d = {:d}".format(model.dim))
@@ -60,7 +70,10 @@ class Trainer:
         cost_func = LogSoftmax()
 
         # optimizer
-        optimizer = Adam(params=model.parameters(), lr=self.lr)
+        if self.optimizer == "sgd":
+            optimizer = SGD(params=model.parameters(), lr=self.lr)
+        else:
+            optimizer = Adam(params=model.parameters(), lr=self.lr)
 
         # entering the main loop
         t_start = time.time()
